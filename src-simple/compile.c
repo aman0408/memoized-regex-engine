@@ -490,7 +490,7 @@ _mergeCustomCharClassRanges(Regexp *r)
 
 // Compile into a Prog
 Prog*
-compile(Regexp *r, int memoMode)
+compile(Regexp *r, int memoMode, int *rleValues, int rleValuesLength, int singleRleK)
 {
 	int i, n;
 	Prog *p;
@@ -501,7 +501,16 @@ compile(Regexp *r, int memoMode)
 	p->start = (Inst*)(p+1);
 	pc = p->start;
 	for (i = 0; i < n; i++) {
-		p->start[i].memoInfo.visitInterval = 1; /* A good default */
+		if (singleRleK != NULL){
+			p->start[i].memoInfo.visitInterval = singleRleK;
+		} else{
+			if (i < rleValuesLength){
+				p->start[i].memoInfo.visitInterval = rleValues[i];	
+			} else {
+				p->start[i].memoInfo.visitInterval = 1; /* A good default */
+			}
+		}
+		
 	}
 	emit(r, memoMode);
 	pc->opcode = Match;
@@ -1159,6 +1168,34 @@ usesBackreferences(Prog *prog)
   return 0;
 }
 
+char* printAllCharRanges(const Inst *inst) {
+    // printf("CharRanges:\n");
+	char* result = (char*)malloc(100 * sizeof(char));
+    if (result == NULL) {
+        printf("Memory allocation failed\n");
+        exit(1);
+    }
+    for (int i = 0; i < inst->charRangeCounts; i++) {
+        // printf("CharRange #%d:\n", i + 1);
+		if (inst->invert) {
+            strcat(result, "^");
+        }
+        for (int j = 0; j < inst->charRanges[i].count; j++) {
+            // Convert the lows and highs to characters and concatenate them
+            char low = inst->charRanges[i].lows[j];
+            char high = inst->charRanges[i].highs[j];
+			// printf("%d: %d %d \n", j, low, high);
+            // char range[6];
+
+            sprintf(result + strlen(result), "%d-%d ", low, high);
+			// printf("%s \n", result);
+            // strcat(result, range);
+        }
+    }
+	// printf("\n%s\n", result);
+	return result;
+}
+
 void
 printprog(Prog *p)
 {
@@ -1167,7 +1204,7 @@ printprog(Prog *p)
 	
 	pc = p->start;
 	e = p->start + p->len;
-	
+	printf("BEGIN\n");
 	for(; pc < e; pc++) {
 		switch(pc->opcode) {
 		default:
@@ -1184,9 +1221,9 @@ printprog(Prog *p)
 			for (i = 0; i < pc->arity; i++) {
 				printf("%d", (int) (pc->edges[i]-p->start));
 				if (i + 1 < pc->arity)
-					printf(",");
+					printf(", ");
 			}
-			printf(" (memo? %d -- state %d, visitInterval %d)\n", pc->memoInfo.shouldMemo, pc->memoInfo.memoStateNum, pc->memoInfo.visitInterval);
+			printf("  (memo? %d -- state %d, visitInterval %d)\n", pc->memoInfo.shouldMemo, pc->memoInfo.memoStateNum, pc->memoInfo.visitInterval);
 			//printf("%2d. split %d, %d\n", (int)(pc->stateNum), (int)(pc->x->stateNum), (int)(pc->y->stateNum));
 			break;
 		case Jmp:
@@ -1212,7 +1249,8 @@ printprog(Prog *p)
 			printf("%2d. recursivematch\n", (int)(pc-p->start));
 			break;
 		case CharClass:
-			printf("%2d. charClass (memo? %d -- state %d, visitInterval %d)\n", (int)(pc-p->start), pc->memoInfo.shouldMemo, pc->memoInfo.memoStateNum, pc->memoInfo.visitInterval);
+			// printAllCharRanges(pc);
+			printf("%2d. charClass %s (memo? %d -- state %d, visitInterval %d)\n", (int)(pc-p->start), printAllCharRanges(pc),  pc->memoInfo.shouldMemo, pc->memoInfo.memoStateNum, pc->memoInfo.visitInterval);
 			//printf("%2d. any\n", (int)(pc->stateNum));
 			break;
 		case Match:
@@ -1225,6 +1263,7 @@ printprog(Prog *p)
 			break;
 		}
 	}
+	printf("END\n");
 }
 
 static void Prog_unmarkAll(Prog *p)

@@ -11,7 +11,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-
+#include <errno.h>
+#include <limits.h>
 // Set this to 1 if you want to see regex and VM representations
 #define DEBUG 0
 
@@ -21,6 +22,9 @@ struct Query
 {
 	char *regex;
 	char *input;
+	int *rleValues;
+	int rleValuesLength;
+	int singleRleK
 };
 
 struct {
@@ -38,7 +42,7 @@ void
 usage(void)
 {
 	/* TODO: Diagnose cases where rle-tuned doesn't help */
-	fprintf(stderr, "usage: re {none|full|indeg|loop} {none|neg|rle|rle-tuned} { regexp string | -f patternAndStr.json }\n");
+	fprintf(stderr, "usage: re {none|full|indeg|loop} {none|neg|rle|rle-tuned} { regexp string | -f patternAndStr.json } { singlerlek int | multiplerlek int,int...}\n");
 	fprintf(stderr, "  The first argument is the memoization strategy\n");
 	fprintf(stderr, "  The second argument is the memo table encoding scheme\n");
 	exit(2);
@@ -96,6 +100,21 @@ loadQuery(char *inFile)
 	q.input = strdup(key->valuestring);
 	logMsg(LOG_INFO, "input: <%s>", q.input);
 
+	key = cJSON_GetObjectItem(parsedJson, "rleValues");
+	int array_size = cJSON_GetArraySize(key);
+	int *int_array = malloc(array_size * sizeof(int));
+	for (int i = 0; i < array_size; i++) {
+        cJSON *item = cJSON_GetArrayItem(key, i);
+		int_array[i] = item->valueint;
+    }
+	// assert(key != NULL);
+	// q.rleValues = key->valuestring;
+	// logMsg(LOG_INFO, "input: <%s>", q.input);
+	// q.rleValuesLength = cJSON_GetArraySize(key);
+	// printf("%s\n", key->valuestring);
+	q.rleValues = int_array;
+	q.rleValuesLength = array_size;
+	// free(int_array);
 	cJSON_Delete(parsedJson);
 	free(rawJson);
 	return q;
@@ -169,10 +188,58 @@ main(int argc, char **argv)
 	if (strcmp(argv[3], "-f") == 0) {
 		q = loadQuery(argv[4]);
 	} else {
-		if (argc < 5)
+		if (argc < 7)
   			usage();
 		q.regex = argv[3];
 		q.input = argv[4];
+		if (strcmp(argv[5], "singlerlek") == 0){
+			q.singleRleK = strtol(argv[6], NULL, 10);
+		} else {
+			char *input = argv[6];
+			char *token;
+			int count = 0;
+			int *numbers = NULL;
+			char *inputCopy = strdup(input);
+			if (inputCopy == NULL) {
+				perror("Failed to duplicate input string");
+				return 1;
+			}
+			token = strtok(inputCopy, ",");
+			while (token != NULL) {
+				count++;
+				token = strtok(NULL, ",");
+			}
+			numbers = (int *)malloc(count * sizeof(int));
+			if (numbers == NULL) {
+				perror("Failed to allocate memory for numbers");
+				free(inputCopy);
+				return 1;
+			}
+
+			strcpy(inputCopy, input);
+			token = strtok(inputCopy, ",");
+			int index = 0;
+
+			while (token != NULL) {
+				char *endptr;
+				errno = 0;
+				long number = strtol(token, &endptr, 10);
+
+				if (errno != 0 || *endptr != '\0' || number > INT_MAX || number < INT_MIN) {
+					printf("Invalid integer: %s\n", token);
+					free(numbers);
+					free(inputCopy);
+					return 1;
+				}
+
+				numbers[index++] = (int)number;
+				token = strtok(NULL, ",");
+			}
+			free(inputCopy);
+			q.rleValues = numbers;
+			q.rleValuesLength = count;
+		}
+		
 	}
 
 	// Parse
@@ -193,12 +260,12 @@ main(int argc, char **argv)
 	}
 
 	// Compile
-	prog = compile(re, memoMode);
-	if (shouldLog(LOG_DEBUG)) {
+	prog = compile(re, memoMode, q.rleValues, q.rleValuesLength, q.singleRleK);
+	// if (shouldLog(LOG_DEBUG)) {
 		logMsg(LOG_INFO, "Compiled :");
 		printprog(prog);
 		printf("\n");
-	}
+	// }
 	Prog_assertNoInfiniteLoops(prog);
 
 	// Memoization settings

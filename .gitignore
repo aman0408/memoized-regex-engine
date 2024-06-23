@@ -1,6 +1,6 @@
 # Python
 *.pyc
-
+env/
 # Git
 
 .git-orig

@@ -623,7 +623,7 @@ def main(regexFile, useCSharpToFindMostEI, perfPumps, maxAttackStringLen, queryP
 
   #### Emit results
   libLF.log('Writing results to {}'.format(outFile))
-  df.to_pickle(outFile)
+  df.to_csv(outFile)
   libLF.log("Data columns: {}".format(df.columns))
 
 #####################################################
