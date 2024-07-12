@@ -204,14 +204,14 @@ RLEVector_getNeighbors(RLEVector *vec, int ix)
   rnn.a = NULL;
   rnn.b = NULL;
   rnn.c = NULL;
-int roundedIx = ix - RUN_OFFSET(ix, vec->nBitsInRun);
-  target.offset = roundedIx;
+// int roundedIx = ix - RUN_OFFSET(ix, vec->nBitsInRun);
+  target.offset = ix;
   target.nRuns = -1;
 
 	node = avl_tree_entry(avl_tree_lookup_node_pred(vec->root, &target.node, RLENode_avl_tree_cmp), RLENode, node);
 	if (node != NULL) {
 		/* node is the largest run beginning <= ix */
-		if (RLENode_contains(node, roundedIx)) {
+		if (RLENode_contains(node, ix)) {
 			/* = */
 			rnn.b = node;
 			rnn.a = avl_tree_entry(avl_tree_prev_in_order(&rnn.b->node), RLENode, node);
@@ -367,13 +367,13 @@ RLEVector_get(RLEVector *vec, int ix)
 {
   RLENode target;
   RLENode *match = NULL;
-int roundedIx = ix - RUN_OFFSET(ix, vec->nBitsInRun);
-  logMsg(LOG_DEBUG, "RLEVector_get: %d", roundedIx);
+// int roundedIx = ix - RUN_OFFSET(ix, vec->nBitsInRun);
+  logMsg(LOG_DEBUG, "RLEVector_get: %d", ix);
 
   if (vec->autoValidate)
     _RLEVector_validate(vec);
 
-  target.offset = roundedIx;
+  target.offset = ix;
   target.nRuns = -1;
   match = avl_tree_entry(
     avl_tree_lookup_node(vec->root, &target.node, RLENode_avl_tree_cmp),
