@@ -1,0 +1,1 @@
+{"pattern": "^.*?<H3>(<a.*a>)*[\\d\\.\\s]*(.*?)</H3>$", "input": "<H3><aa><aa><aa><aa><aa><aa><a", "rleKValue": 1}

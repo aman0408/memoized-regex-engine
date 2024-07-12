@@ -297,7 +297,7 @@ class MyTask(libLF.parallel.ParallelTask): # Not actually parallel, but keep the
     
     Returns: automatonSize (integer), phiSize (integer), time (numeric), algoSpace (numeric), bytesSpace (numeric)
     """
-    queryFile = libMemo.ProtoRegexEngine.buildQueryFile(regex.pattern, mostEI.build(nPumps, maxAttackStringLen)[0])
+    queryFile = libMemo.ProtoRegexEngine.buildQueryFile(regex.pattern, mostEI.build(nPumps, maxAttackStringLen)[0], rleKValue=regex.rleKValue)
 
     measures = []
     for i in range(0, nTrialsPerCondition):

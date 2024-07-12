@@ -490,7 +490,7 @@ _mergeCustomCharClassRanges(Regexp *r)
 
 // Compile into a Prog
 Prog*
-compile(Regexp *r, int memoMode, int *rleValues, int rleValuesLength, int singleRleK)
+compile(Regexp *r, int memoMode, int memoEncoding, int *rleValues, int rleValuesLength, int singleRleK)
 {
 	int i, n;
 	Prog *p;
@@ -500,18 +500,27 @@ compile(Regexp *r, int memoMode, int *rleValues, int rleValuesLength, int single
 	p = mal(sizeof *p + n*sizeof p->start[0]);
 	p->start = (Inst*)(p+1);
 	pc = p->start;
-	for (i = 0; i < n; i++) {
-		if (singleRleK != NULL){
-			p->start[i].memoInfo.visitInterval = singleRleK;
-		} else{
-			if (i < rleValuesLength){
-				p->start[i].memoInfo.visitInterval = rleValues[i];	
-			} else {
-				p->start[i].memoInfo.visitInterval = 1; /* A good default */
-			}
+	if (memoEncoding == ENCODING_RLE_TUNED) {
+		// for (i = 0; i < n; i++) {
+		// 	if (singleRleK != NULL){
+		// 		p->start[i].memoInfo.visitInterval = singleRleK;
+		// 	} else{
+		// 		if (i < rleValuesLength){
+		// 			p->start[i].memoInfo.visitInterval = rleValues[i];	
+		// 		} else {
+		// 			p->start[i].memoInfo.visitInterval = 1; /* A good default */
+		// 		}
+		// 	}
+		// }
+		for (i = 0; i < n; i++) {
+			p->start[i].memoInfo.visitInterval = singleRleK; /* A good default */
 		}
-		
+	} else {
+		for (i = 0; i < n; i++) {
+			p->start[i].memoInfo.visitInterval = 1; /* A good default */
+		}
 	}
+	
 	emit(r, memoMode);
 	pc->opcode = Match;
 	pc++;

@@ -50,13 +50,13 @@ class ProtoRegexEngine:
             ES_None: "none",
             ES_Negative: "neg",
             ES_RLE: "rle",
-            # ES_RLE_TUNED: "rle-tuned", # TODO Work out the right math here
+            ES_RLE_TUNED: "rle-tuned", # TODO Work out the right math here
         }
 
         all = scheme2cox.keys()
 
     @staticmethod
-    def buildQueryFile(pattern, input, filePrefix="protoRegexEngineQueryFile-"):
+    def buildQueryFile(pattern, input, filePrefix="protoRegexEngineQueryFile-", rleKValue=1):
         """Build a query file
         
         pattern: string
@@ -71,6 +71,7 @@ class ProtoRegexEngine:
             json.dump({
                 "pattern": pattern,
                 "input": input,
+                "rleKValue": rleKValue
             }, outStream)
         return name
 
@@ -102,7 +103,6 @@ class ProtoRegexEngine:
         res = re.search(r"Need (\d+) bits", stdout)
         if res:
           libLF.log("Wished for {} bits".format(res.group(1)))
-
         # libLF.log("stderr: <" + stderr + ">")
         return ProtoRegexEngine.EngineMeasurements(stderr.strip(), "-no match-" in stdout)
     
@@ -155,11 +155,13 @@ class SimpleRegex:
   def __init__(self):
     self.pattern = None
     self.evilInputs = []
+    self.rleKValue = 1
     return
   
   def initFromNDJSON(self, line):
     obj = json.loads(line)
     self.pattern = obj['pattern']
+    self.rleKValue = obj['rleKValue']
     self.evilInputs = []
     if 'evilInputs' in obj:
       for _ei in obj['evilInputs']:

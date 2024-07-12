@@ -69,7 +69,7 @@ def runcmd_OutAndErr(cmd=None, args=None, timeout=None):
     s = ' '.join(ar)
   log('CMD: {}'.format(s))
   completedProcess = subprocess.run(ar, stdout=subprocess.PIPE, stderr=subprocess.PIPE, close_fds=True, timeout=timeout)
-  return completedProcess.returncode, completedProcess.stdout.decode('utf-8'), completedProcess.stderr.decode('utf-8')
+  return completedProcess.returncode, completedProcess.stdout.decode('utf-8', errors="replace"), completedProcess.stderr.decode('utf-8', errors="replace")
 
 def chkcmd(cmd):
   """Run this command and confirm rc is 0.

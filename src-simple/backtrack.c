@@ -436,9 +436,20 @@ BACKTRACKING_SEARCH:
 
 CleanupAndRet:
 	//decref(&sub);
+  if(memo.encoding == MEMO_NONE){
+for (int i = 0; i < prog->nMemoizedStates; i++) {  
+    printf("%d) ", i);
+    for (int j = 0; j < (strlen(input) + 1); j++) {
+      printf("%d ", memo.visitVectors[i][j]);
+    }
+    printf("\n");
+  }
+  }
+  
   printStats(prog, &memo, &visitTable, startTime, sub);
   ThreadVec_free(&ready);
   freeVisitTable(visitTable);
   freeMemoTable(memo);
+  
   return matched;
 }

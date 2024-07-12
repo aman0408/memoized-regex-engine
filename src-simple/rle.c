@@ -204,14 +204,14 @@ RLEVector_getNeighbors(RLEVector *vec, int ix)
   rnn.a = NULL;
   rnn.b = NULL;
   rnn.c = NULL;
-
-  target.offset = ix;
+int roundedIx = ix - RUN_OFFSET(ix, vec->nBitsInRun);
+  target.offset = roundedIx;
   target.nRuns = -1;
 
 	node = avl_tree_entry(avl_tree_lookup_node_pred(vec->root, &target.node, RLENode_avl_tree_cmp), RLENode, node);
 	if (node != NULL) {
 		/* node is the largest run beginning <= ix */
-		if (RLENode_contains(node, ix)) {
+		if (RLENode_contains(node, roundedIx)) {
 			/* = */
 			rnn.b = node;
 			rnn.a = avl_tree_entry(avl_tree_prev_in_order(&rnn.b->node), RLENode, node);
@@ -286,7 +286,7 @@ RLEVector_set(RLEVector *vec, int ix)
   int oldRunKernel = 0, newRunKernel = 0;
 	int roundedIx = ix - RUN_OFFSET(ix, vec->nBitsInRun);
 
-  logMsg(LOG_VERBOSE, "RLEVector_set: %d", ix);
+  logMsg(LOG_VERBOSE, "RLEVector_set: %d", roundedIx);
 
   if (vec->autoValidate)
     _RLEVector_validate(vec);
@@ -299,7 +299,7 @@ RLEVector_set(RLEVector *vec, int ix)
    * Update rnn.{a,b,c} as we go. */
   if (rnn.b == NULL) {
     /* Case: creates a run */
-    logMsg(LOG_DEBUG, "%d: Creating a run", ix);
+    logMsg(LOG_DEBUG, "%d: Creating a run", roundedIx);
 
     newRunKernel = MASK_FOR(ix, vec->nBitsInRun);
     newRun = RLENode_create(roundedIx, 1, newRunKernel, vec->nBitsInRun);
@@ -367,13 +367,13 @@ RLEVector_get(RLEVector *vec, int ix)
 {
   RLENode target;
   RLENode *match = NULL;
-
-  logMsg(LOG_DEBUG, "RLEVector_get: %d", ix);
+int roundedIx = ix - RUN_OFFSET(ix, vec->nBitsInRun);
+  logMsg(LOG_DEBUG, "RLEVector_get: %d", roundedIx);
 
   if (vec->autoValidate)
     _RLEVector_validate(vec);
 
-  target.offset = ix;
+  target.offset = roundedIx;
   target.nRuns = -1;
   match = avl_tree_entry(
     avl_tree_lookup_node(vec->root, &target.node, RLENode_avl_tree_cmp),
@@ -417,10 +417,20 @@ RLEVector_destroy(RLEVector *vec)
 
   return;
 }
-
+static void ullToBinaryString(unsigned long long value, char *buffer, int bufferSize) {
+    buffer[bufferSize - 1] = '\0';
+    int index = bufferSize - 2;
+    while (index >= 0) {
+        buffer[index] = (value % 2) ? '1' : '0';
+        value /= 2;
+        index--;
+    }
+}
 static void _RLEVector_addRun(RLEVector *vec, RLENode *node)
 {
-  logMsg(LOG_DEBUG, "Adding run (%d,%d,%llu)", node->offset, node->nRuns, node->run);
+  char runBinary[65]; // 64 bits + 1 for null terminator
+    ullToBinaryString(node->run, runBinary, sizeof(runBinary));
+  logMsg(LOG_DEBUG, "Adding run (%d,%d,%s)", node->offset, node->nRuns, runBinary);
 
 	assert(avl_tree_insert(&vec->root, &node->node, RLENode_avl_tree_cmp) == NULL);
   vec->currNEntries++;

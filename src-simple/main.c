@@ -100,21 +100,17 @@ loadQuery(char *inFile)
 	q.input = strdup(key->valuestring);
 	logMsg(LOG_INFO, "input: <%s>", q.input);
 
-	key = cJSON_GetObjectItem(parsedJson, "rleValues");
-	int array_size = cJSON_GetArraySize(key);
-	int *int_array = malloc(array_size * sizeof(int));
-	for (int i = 0; i < array_size; i++) {
-        cJSON *item = cJSON_GetArrayItem(key, i);
-		int_array[i] = item->valueint;
-    }
-	// assert(key != NULL);
-	// q.rleValues = key->valuestring;
-	// logMsg(LOG_INFO, "input: <%s>", q.input);
-	// q.rleValuesLength = cJSON_GetArraySize(key);
-	// printf("%s\n", key->valuestring);
-	q.rleValues = int_array;
-	q.rleValuesLength = array_size;
-	// free(int_array);
+	// key = cJSON_GetObjectItem(parsedJson, "rleValues");
+	// int array_size = cJSON_GetArraySize(key);
+	// int *int_array = malloc(array_size * sizeof(int));
+	// for (int i = 0; i < array_size; i++) {
+    //     cJSON *item = cJSON_GetArrayItem(key, i);
+	// 	int_array[i] = item->valueint;
+    // }
+	// q.rleValues = int_array;
+	// q.rleValuesLength = array_size;
+	key = cJSON_GetObjectItem(parsedJson, "rleKValue");
+	q.singleRleK = key->valueint;
 	cJSON_Delete(parsedJson);
 	free(rawJson);
 	return q;
@@ -167,6 +163,44 @@ freeprog(Prog *p)
 	}
 	free(p); // This also free p->start
 }
+char* processStringWithEscapes(const char *str) {
+	char *parsedString = (char *)malloc(strlen(str) + 1);
+    char *dst = parsedString; // Destination pointer for the parsed string
+    while (*str) {
+        if (*str == '\\') {
+            str++;
+            switch (*str) {
+                case 'n':
+                    *dst = '\n';
+                    break;
+                case 't':
+                    *dst = '\t';
+                    break;
+                case '\\':
+                    *dst = '\\';
+                    break;
+                case '\"':
+                    *dst = '\"';
+                    break;
+                case '\'':
+                    *dst = '\'';
+                    break;
+                default:
+                    *dst = '\\';
+                    dst++;
+                    *dst = *str;
+                    break;
+            }
+        } else {
+            *dst = *str;
+        }
+        dst++;
+        str++;
+    }
+    *dst = '\0'; // Null-terminate the parsed string
+
+    return parsedString;
+}
 
 int
 main(int argc, char **argv)
@@ -191,7 +225,8 @@ main(int argc, char **argv)
 		if (argc < 7)
   			usage();
 		q.regex = argv[3];
-		q.input = argv[4];
+		// q.input = argv[4];
+		q.input = processStringWithEscapes(argv[4]);
 		if (strcmp(argv[5], "singlerlek") == 0){
 			q.singleRleK = strtol(argv[6], NULL, 10);
 		} else {
@@ -260,7 +295,7 @@ main(int argc, char **argv)
 	}
 
 	// Compile
-	prog = compile(re, memoMode, q.rleValues, q.rleValuesLength, q.singleRleK);
+	prog = compile(re, memoMode, memoEncoding, q.rleValues, q.rleValuesLength, q.singleRleK);
 	// if (shouldLog(LOG_DEBUG)) {
 		logMsg(LOG_INFO, "Compiled :");
 		printprog(prog);
