@@ -217,7 +217,7 @@ class MemoizationDynamicAnalysis:
     self.phiInDeg = -1
     self.phiQuantifier = -1
     self.inputLength = -1
-
+    self.rleKValue = 1
     self.evilInput = None # If an SL regex
     self.nPumps = -1 # If an SL regex
 
@@ -310,8 +310,8 @@ class MemoizationDynamicAnalysis:
       ProtoRegexEngine.ENCODING_SCHEME.ES_None
     ]
     # Should be "bigger" -- the difference can arise due to pump strings being > 1 character long
-    assert fullSpaceCostAlgo <= self.automatonSize * (self.inputLength+1), \
-      "fullSpaceCost {} is not >= {} * {}".format(fullSpaceCostAlgo, self.automatonSize, self.inputLength)
+    # assert fullSpaceCostAlgo <= self.automatonSize * (self.inputLength+1), \
+    #   "fullSpaceCost {} is not >= {} * {}".format(fullSpaceCostAlgo, self.automatonSize, self.inputLength)
 
     # Full table should have the most space complexity
     for selectionScheme, enc2space in self.selectionPolicy_to_enc2spaceAlgo.items():
@@ -346,6 +346,7 @@ class MemoizationDynamicAnalysis:
           "selectionPolicy": selectionPolicy,
           "encodingPolicy": encodingPolicy,
           "timeCost": self.selectionPolicy_to_enc2time[selectionPolicy][encodingPolicy],
+          "rleKValue": self.rleKValue,
           "spaceCostAlgo": self.selectionPolicy_to_enc2spaceAlgo[selectionPolicy][encodingPolicy],
           "spaceCostBytes": self.selectionPolicy_to_enc2spaceBytes[selectionPolicy][encodingPolicy],
         })

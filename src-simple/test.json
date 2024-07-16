@@ -1,1 +1,1 @@
-{"pattern": "^.*?<H3>(<a.*a>)*[\\d\\.\\s]*(.*?)</H3>$", "input": "<H3><aa><aa><aa><aa><aa><aa><a", "rleKValue": 1}
+{"pattern": "(hdl:\\s*|(?:https?://)?hdl\\.handle\\.net/)?([^/\\.]+(\\.[^/\\.]+)*/.*)$", "input": "-.-.\uffff.\uffff", "rleKValue": 1}

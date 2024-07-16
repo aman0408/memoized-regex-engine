@@ -114,7 +114,7 @@ _inCharClass(Inst *pc, char c)
 
   // Test for membership in each of the CharRange conditions
   for (i = 0; i < pc->charRangeCounts; i++) {
-    logMsg(LOG_DEBUG, "testing range %d of %d (inv this one? %d)", i, pc->charRangeCounts, pc->charRanges[i].invert ? 1 : 0);
+    logMsg(LOG_DEBUG, "testing range %d of %d (inv this one? %d)", i, pc->charRangeCounts, pc->invert ? 1 : 0);
     inThisRange = 0;
     for (j = 0; j < pc->charRanges[i].count; j++) {
       logMsg(LOG_DEBUG, "testing range %d.%d: [%d, %d]", i, j, pc->charRanges[i].lows[j], pc->charRanges[i].highs[j]);
