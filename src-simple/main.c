@@ -24,7 +24,7 @@ struct Query
 	char *input;
 	int *rleValues;
 	int rleValuesLength;
-	int singleRleK
+	int singleRleK;
 };
 
 struct {
