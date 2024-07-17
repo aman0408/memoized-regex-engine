@@ -1240,7 +1240,7 @@ printprog(Prog *p)
 			//printf("%2d. jmp %d\n", (int)(pc->stateNum), (int)(pc->x->stateNum));
 			break;
 		case Char:
-			printf("%2d. char %c (memo? %d -- state %d, visitInterval %d)\n", (int)(pc-p->start), pc->c, pc->memoInfo.shouldMemo, pc->memoInfo.memoStateNum, pc->memoInfo.visitInterval);
+			printf("%2d. char %d (memo? %d -- state %d, visitInterval %d)\n", (int)(pc-p->start), pc->c, pc->memoInfo.shouldMemo, pc->memoInfo.memoStateNum, pc->memoInfo.visitInterval);
 			//printf("%2d. char %c\n", (int)(pc->stateNum), pc->c);
 			break;
 		case Any:
