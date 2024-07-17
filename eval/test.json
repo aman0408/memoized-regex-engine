@@ -1,1 +1,3 @@
-{"pattern": "^.*?<H3>(<a.*a>)*[\\d\\.\\s]*(.*?)</H3>$", "rleKValue": 4, "evilInputs": [{ "pumpPairs": [{ "prefix": "<H3><a", "pump": "a><a" }], "suffix": "" }]}
+{"pattern": "^(.+=)*(\\(+)$", "evilInputs": [{"pumpPairs": [{"prefix": "\uffff", "pump": "=\uffff"}], "suffix": ""} ], "rleKValue": 2}
+{"pattern": "^(.+=)*(\\(+)$", "evilInputs": [{"pumpPairs": [{"prefix": "\uffff", "pump": "=\uffff"}], "suffix": ""} ], "rleKValue": 1}
+{"pattern": "^(.+=)*(\\(+)$", "evilInputs": [{"pumpPairs": [{"prefix": "\uffff", "pump": "=\uffff"}], "suffix": ""} ], "rleKValue": 4}

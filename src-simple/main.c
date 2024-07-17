@@ -99,7 +99,7 @@ loadQuery(char *inFile)
 	assert(key != NULL);
 	q.input = strdup(key->valuestring);
 	logMsg(LOG_INFO, "input: <%s>", q.input);
-
+	logMsg(LOG_INFO, "length: %zu", strlen(q.input));
 	// key = cJSON_GetObjectItem(parsedJson, "rleValues");
 	// int array_size = cJSON_GetArraySize(key);
 	// int *int_array = malloc(array_size * sizeof(int));

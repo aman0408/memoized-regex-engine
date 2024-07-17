@@ -1,0 +1,13 @@
+,SL,csharpBehavior,encodingPolicy,nPumps,pattern,perlBehavior,phpBehavior,productionEnginePumps,rleKValue,selectionPolicy,spaceCostAlgo,spaceCostBytes,timeCost,|Phi_{in-deg > 1}|,|Phi_{quantifier}|,|Q|,|w|
+0,True,,negative encoding,20000,(\'(?:[^\']+|\'\')*\'),,,-1,1,selective: loop,60011,9165936,32011,5,4,22,20005
+1,True,,RLE,20000,(\'(?:[^\']+|\'\')*\'),,,-1,1,selective: loop,7,432,20979,5,4,22,20005
+2,True,,RLE-tuned,20000,(\'(?:[^\']+|\'\')*\'),,,-1,1,selective: loop,7,432,18698,5,4,22,20005
+3,True,,no encoding,20000,(\'(?:[^\']+|\'\')*\'),,,-1,1,selective: loop,80020,10004,39181,5,4,22,20005
+4,True,,negative encoding,20000,(\'(?:[^\']+|\'\')*\'),,,-1,1,full memoization,280046,42423840,122665,5,4,22,20005
+5,True,,RLE,20000,(\'(?:[^\']+|\'\')*\'),,,-1,1,full memoization,30,1968,43493,5,4,22,20005
+6,True,,RLE-tuned,20000,(\'(?:[^\']+|\'\')*\'),,,-1,1,full memoization,30,1968,45657,5,4,22,20005
+7,True,,no encoding,20000,(\'(?:[^\']+|\'\')*\'),,,-1,1,full memoization,440110,55022,95014,5,4,22,20005
+8,True,,negative encoding,20000,(\'(?:[^\']+|\'\')*\'),,,-1,1,selective: indeg>1,80014,12046366,40579,5,4,22,20005
+9,True,,RLE,20000,(\'(?:[^\']+|\'\')*\'),,,-1,1,selective: indeg>1,9,552,18414,5,4,22,20005
+10,True,,RLE-tuned,20000,(\'(?:[^\']+|\'\')*\'),,,-1,1,selective: indeg>1,9,552,18489,5,4,22,20005
+11,True,,no encoding,20000,(\'(?:[^\']+|\'\')*\'),,,-1,1,selective: indeg>1,100025,12505,28525,5,4,22,20005

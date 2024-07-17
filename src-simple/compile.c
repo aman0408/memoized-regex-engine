@@ -1186,7 +1186,7 @@ char* printAllCharRanges(const Inst *inst) {
     }
     for (int i = 0; i < inst->charRangeCounts; i++) {
         // printf("CharRange #%d:\n", i + 1);
-		if (inst->invert) {
+		if (inst->invert || inst->charRanges[i].invert) {
             strcat(result, "^");
         }
         for (int j = 0; j < inst->charRanges[i].count; j++) {

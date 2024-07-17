@@ -1,0 +1,57 @@
+{"pattern": "__version__ = [\\'\\\"]v((\\d+\\.?)+)[\\'\\\"]", "evilInputs": [{"pumpPairs": [{"prefix": "__version__ = \"v9", "pump": "9"}], "suffix": ""}], "rleKValue": 1}
+{"pattern": "^UPSTREAM: (\\d+)+:(.+)", "evilInputs": [{"pumpPairs": [{"prefix": "UPSTREAM: 9", "pump": "9"}], "suffix": ""}], "rleKValue": 1}
+{"pattern": "^([A-Z]+[a-z]*)+$", "evilInputs": [{"pumpPairs": [{"prefix": "Z", "pump": "Z"}], "suffix": ""}], "rleKValue": 1}
+{"pattern": "^([A-Z]+\\s*)+$", "evilInputs": [{"pumpPairs": [{"prefix": "Z", "pump": "Z"}], "suffix": ""}], "rleKValue": 1}
+{"pattern": "([^\\[]*)(\\[(\\d+)+\\])?", "evilInputs": [{"pumpPairs": [{"prefix": "[9", "pump": "9"}], "suffix": ""}], "rleKValue": 1}
+{"pattern": "(?:(\\d+):)?(?:(\\d+)+:)?(\\d+(?:\\.\\d+)?)$", "evilInputs": [{"pumpPairs": [{"prefix": "9", "pump": "9"}], "suffix": ""}], "rleKValue": 1}
+{"pattern": "^regex:(.+)+$", "evilInputs": [{"pumpPairs": [{"prefix": "regex:\uffff", "pump": "\uffff"}], "suffix": ""}], "rleKValue": 1}
+{"pattern": "\\%(\\d+)*#", "evilInputs": [{"pumpPairs": [{"prefix": "%9", "pump": "9"}], "suffix": ""}], "rleKValue": 1}
+{"pattern": "^(?:.+/)*(\\d{2,4}-\\d{1,2}-\\d{1,2})-([^/]*)(\\.[^.]+)$", "evilInputs": [{"pumpPairs": [{"prefix": "\uffff", "pump": "/\uffff"}], "suffix": ""}], "rleKValue": 2}
+{"pattern": "^\\\"(.+)*\\\"$", "evilInputs": [{"pumpPairs": [{"prefix": "\"\uffff", "pump": "\uffff"}], "suffix": ""}], "rleKValue": 1}
+{"pattern": "^([0-9]+[.,-]?)+$", "evilInputs": [{"pumpPairs": [{"prefix": "9", "pump": "9"}], "suffix": ""}], "rleKValue": 1}
+{"pattern": "(:|\\s)\\+(\\d+)+\\.(\\d+)", "evilInputs": [{"pumpPairs": [{"prefix": "\r+9", "pump": "9"}], "suffix": ""}], "rleKValue": 1}
+{"pattern": "^((\\d+,?)+)$", "evilInputs": [{"pumpPairs": [{"prefix": "9", "pump": "9"}], "suffix": ""}], "rleKValue": 1}
+{"pattern": "\\[(\\d+;)?(\\d+)*m", "evilInputs": [{"pumpPairs": [{"prefix": "[9", "pump": "9"}], "suffix": ""}], "rleKValue": 1}
+{"pattern": "([0-9]+)*\\*[0-9]+", "evilInputs": [{"pumpPairs": [{"prefix": "9", "pump": "9"}], "suffix": ""}], "rleKValue": 1}
+{"pattern": "jquery(-(\\.?\\d+)+)?(\\.intellisense)?(\\.min)?\\.js$", "evilInputs": [{"pumpPairs": [{"prefix": "jquery-9", "pump": "9"}], "suffix": ""}], "rleKValue": 1}
+{"pattern": "^(\\+|\\()?(\\d+[ \\+\\(\\)\\/-]*)+$", "evilInputs": [{"pumpPairs": [{"prefix": "9", "pump": "9"}], "suffix": ""}], "rleKValue": 1}
+{"pattern": "(\\S+).([a|n|r|v]) (\\d+) ((\\d+ ?)+)", "evilInputs": [{"pumpPairs": [{"prefix": "\r\uffffa 9 9", "pump": "9"}], "suffix": ""}], "rleKValue": 1}
+{"pattern": "^(\\d+:?)+$", "evilInputs": [{"pumpPairs": [{"prefix": "9", "pump": "9"}], "suffix": ""}], "rleKValue": 1}
+{"pattern": "(.+=)*(\\(+)", "evilInputs": [{"pumpPairs": [{"prefix": "\uffff", "pump": "=\uffff"}], "suffix": ""}], "rleKValue": 2}
+{"pattern": "^(.+\\.)*[xy]$", "evilInputs": [{"pumpPairs": [{"prefix": "\uffff", "pump": ".\uffff"}], "suffix": ""}], "rleKValue": 2}
+{"pattern": "^([a-z]+)+([0-9]+)+$", "evilInputs": [{"pumpPairs": [{"prefix": "z9", "pump": "9"}], "suffix": ""}, {"pumpPairs": [{"prefix": "z", "pump": "z"}], "suffix": ""}], "rleKValue": 1}
+{"pattern": "^(\\d+)+\\.(\\d+)\\.(\\d+)\\.(\\d+)$", "evilInputs": [{"pumpPairs": [{"prefix": "9", "pump": "9"}], "suffix": ""}], "rleKValue": 1}
+{"pattern": "\\/\\/(\\[.+\\])+\\n", "evilInputs": [{"pumpPairs": [{"prefix": "//[\uffff", "pump": "][\uffff"}], "suffix": ""}], "rleKValue": 3}
+{"pattern": "(?:version|v)\\s*((?:[0-9]+\\.?)+)(?:-.*)", "evilInputs": [{"pumpPairs": [{"prefix": "v9", "pump": "9"}], "suffix": ""}], "rleKValue": 1}
+{"pattern": "^UPSTREAM: ([\\w/-]+): (\\d+)+:(.+)", "evilInputs": [{"pumpPairs": [{"prefix": "UPSTREAM: -: 9", "pump": "9"}], "suffix": ""}], "rleKValue": 1}
+{"pattern": "^(\\e\\[(\\d+;?)*m)*$", "evilInputs": [{"pumpPairs": [{"prefix": "e[9", "pump": "9"}], "suffix": ""}], "rleKValue": 1}
+{"pattern": "\\033\\[(\\d+)*m", "evilInputs": [{"pumpPairs": [{"prefix": "033[9", "pump": "9"}], "suffix": ""}], "rleKValue": 1}
+{"pattern": "^(?:\\s*\\/\\*(?:.*)\\*\\/)*\\s*(\\w+)\\(\\{", "evilInputs": [{"pumpPairs": [{"prefix": "/*", "pump": "*//*"}], "suffix": ""}], "rleKValue": 4}
+{"pattern": "(\\d+)+\\s(\\w+)", "evilInputs": [{"pumpPairs": [{"prefix": "9", "pump": "9"}], "suffix": ""}], "rleKValue": 1}
+{"pattern": "\\\\e\\[(?:\\d+;?)+m", "evilInputs": [{"pumpPairs": [{"prefix": "\\e[9", "pump": "9"}], "suffix": ""}], "rleKValue": 1}
+{"pattern": "\\u001b\\[(\\d+)*m", "evilInputs": [{"pumpPairs": [{"prefix": "u001b[9", "pump": "9"}], "suffix": ""}], "rleKValue": 1}
+{"pattern": "^[\\w-]*-(\\d+)+$", "evilInputs": [{"pumpPairs": [{"prefix": "-9", "pump": "9"}], "suffix": ""}], "rleKValue": 1}
+{"pattern": "^https?://([\\S]+\\.)*[\\S]+(:[\\d]{2,})*(/+[\\S+]*)*$", "evilInputs": [{"pumpPairs": [{"prefix": "http://\r/", "pump": "/"}], "suffix": ""}], "rleKValue": 1}
+{"pattern": "(a+)+$", "evilInputs": [{"pumpPairs": [{"prefix": "a", "pump": "a"}], "suffix": ""}], "rleKValue": 1}
+{"pattern": "^([A-Z]+[a-z\\d\\$]*)+$", "evilInputs": [{"pumpPairs": [{"prefix": "Z", "pump": "Z"}], "suffix": ""}], "rleKValue": 1}
+{"pattern": "^\\/(.*)\\/([a-z]+)*$", "evilInputs": [{"pumpPairs": [{"prefix": "//z", "pump": "z"}], "suffix": ""}], "rleKValue": 1}
+{"pattern": "^\\[(\\w+)(?: \"(.+)\")*\\]", "evilInputs": [{"pumpPairs": [{"prefix": "[9 \"\uffff", "pump": "\" \"\uffff"}], "suffix": ""}], "rleKValue": 4}
+{"pattern": "(\\d+)\\s(.*)\\(((\\d+,?)+)\\)\\.?", "evilInputs": [{"pumpPairs": [{"prefix": "9\r(9", "pump": "9"}], "suffix": ""}], "rleKValue": 1}
+{"pattern": "^(\\d+\\.?)+$", "evilInputs": [{"pumpPairs": [{"prefix": "9", "pump": "9"}], "suffix": ""}], "rleKValue": 1}
+{"pattern": "(.+)*$", "evilInputs": [{"pumpPairs": [{"prefix": "\uffff", "pump": "\uffff"}], "suffix": ""}], "rleKValue": 1}
+{"pattern": "^([ \\t]*[\\r\\n]+)+|([\\r\\n]+[ \\t]*)+$", "evilInputs": [{"pumpPairs": [{"prefix": "\n", "pump": "\n"}], "suffix": ""}, {"pumpPairs": [{"prefix": "\n", "pump": "\n"}], "suffix": ""}], "rleKValue": 1}
+{"pattern": "\\033\\[(?:\\d+\\;?)+m", "evilInputs": [{"pumpPairs": [{"prefix": "033[9", "pump": "9"}], "suffix": ""}], "rleKValue": 1}
+{"pattern": "^(\\w+) (?:\\((\\d+)+\\))?", "evilInputs": [{"pumpPairs": [{"prefix": "9 (9", "pump": "9"}], "suffix": ""}], "rleKValue": 1}
+{"pattern": "\\e\\[(([0-9]+;?)+)m", "evilInputs": [{"pumpPairs": [{"prefix": "e[9", "pump": "9"}], "suffix": ""}], "rleKValue": 1}
+{"pattern": "([A-Z]+[a-z]*)+$", "evilInputs": [{"pumpPairs": [{"prefix": "Z", "pump": "Z"}], "suffix": ""}], "rleKValue": 1}
+{"pattern": "\\u001b\\[(\\d+;?)+m", "evilInputs": [{"pumpPairs": [{"prefix": "u001b[9", "pump": "9"}], "suffix": ""}], "rleKValue": 1}
+{"pattern": "^(\\.+\\/*)+$", "evilInputs": [{"pumpPairs": [{"prefix": ".", "pump": "."}], "suffix": ""}], "rleKValue": 1}
+{"pattern": "^[a-zA-Z][a-z\\d]*([A-Z]+[a-z\\d]*)+$", "evilInputs": [{"pumpPairs": [{"prefix": "ZZ", "pump": "Z"}], "suffix": ""}], "rleKValue": 1}
+{"pattern": "^(\\d+)+\\.(\\d+)\\.(\\d+)\\.(\\d+)/(\\d+)$", "evilInputs": [{"pumpPairs": [{"prefix": "9", "pump": "9"}], "suffix": ""}], "rleKValue": 1}
+{"pattern": "^(\\d+[smhdw]?)+$", "evilInputs": [{"pumpPairs": [{"prefix": "9", "pump": "9"}], "suffix": ""}], "rleKValue": 1}
+{"pattern": "^([a-z]+\\s*)+$", "evilInputs": [{"pumpPairs": [{"prefix": "z", "pump": "z"}], "suffix": ""}], "rleKValue": 1}
+{"pattern": ":([a-z]+_?)*format$", "evilInputs": [{"pumpPairs": [{"prefix": ":z", "pump": "z"}], "suffix": ""}], "rleKValue": 1}
+{"pattern": "^(\\d+,?)+$", "evilInputs": [{"pumpPairs": [{"prefix": "9", "pump": "9"}], "suffix": ""}], "rleKValue": 1}
+{"pattern": "^(.+)+ is (ready|ready and printing|not ready)$", "evilInputs": [{"pumpPairs": [{"prefix": "\uffff", "pump": "\uffff"}], "suffix": ""}], "rleKValue": 1}
+{"pattern": "V((\\d)+\\.?)+__.+\\.sql$", "evilInputs": [{"pumpPairs": [{"prefix": "V9", "pump": "9"}], "suffix": ""}], "rleKValue": 1}
+{"pattern": "([0-9]+\\s?)+$", "evilInputs": [{"pumpPairs": [{"prefix": "9", "pump": "9"}], "suffix": ""}], "rleKValue": 1}

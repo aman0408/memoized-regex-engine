@@ -1,0 +1,13 @@
+,SL,csharpBehavior,encodingPolicy,nPumps,pattern,perlBehavior,phpBehavior,productionEnginePumps,rleKValue,selectionPolicy,spaceCostAlgo,spaceCostBytes,timeCost,|Phi_{in-deg > 1}|,|Phi_{quantifier}|,|Q|,|w|
+0,True,,RLE-tuned,20000,^(array|hash|scalar)(?:_?ref)?\s*(?:\(\s*(\S+)\s*\))*$,,,-1,4,selective: loop,50006,2400408,54001,7,5,49,80009
+1,True,,no encoding,20000,^(array|hash|scalar)(?:_?ref)?\s*(?:\(\s*(\S+)\s*\))*$,,,-1,4,selective: loop,400045,50010,297210,7,5,49,80009
+2,True,,RLE,20000,^(array|hash|scalar)(?:_?ref)?\s*(?:\(\s*(\S+)\s*\))*$,,,-1,4,selective: loop,40008,1920504,51115,7,5,49,80009
+3,True,,negative encoding,20000,^(array|hash|scalar)(?:_?ref)?\s*(?:\(\s*(\S+)\s*\))*$,,,-1,4,selective: loop,130010,19770080,66606,7,5,49,80009
+4,True,,RLE-tuned,20000,^(array|hash|scalar)(?:_?ref)?\s*(?:\(\s*(\S+)\s*\))*$,,,-1,4,full memoization,160032,7682712,129080,7,5,49,80009
+5,True,,no encoding,20000,^(array|hash|scalar)(?:_?ref)?\s*(?:\(\s*(\S+)\s*\))*$,,,-1,4,full memoization,3920441,490098,2815792,7,5,49,80009
+6,True,,RLE,20000,^(array|hash|scalar)(?:_?ref)?\s*(?:\(\s*(\S+)\s*\))*$,,,-1,4,full memoization,150041,7203144,142490,7,5,49,80009
+7,True,,negative encoding,20000,^(array|hash|scalar)(?:_?ref)?\s*(?:\(\s*(\S+)\s*\))*$,,,-1,4,full memoization,380041,58920255,215170,7,5,49,80009
+8,True,,RLE-tuned,20000,^(array|hash|scalar)(?:_?ref)?\s*(?:\(\s*(\S+)\s*\))*$,,,-1,4,selective: indeg>1,50008,2400552,54318,7,5,49,80009
+9,True,,no encoding,20000,^(array|hash|scalar)(?:_?ref)?\s*(?:\(\s*(\S+)\s*\))*$,,,-1,4,selective: indeg>1,560063,70014,409690,7,5,49,80009
+10,True,,RLE,20000,^(array|hash|scalar)(?:_?ref)?\s*(?:\(\s*(\S+)\s*\))*$,,,-1,4,selective: indeg>1,40010,1920648,50142,7,5,49,80009
+11,True,,negative encoding,20000,^(array|hash|scalar)(?:_?ref)?\s*(?:\(\s*(\S+)\s*\))*$,,,-1,4,selective: indeg>1,130012,19770363,69127,7,5,49,80009
