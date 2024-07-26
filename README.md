@@ -84,3 +84,6 @@ The simple and full regex engines are extensions of existing engines.
 The memoization extensions, test suite, and benchmark suite are my own.
 
 FYI: Most data in the paper was generated on a 10-node compute cluster. On a standard desktop it would take several days/weeks(?) to replicate.
+
+
+MEMOIZATION_PROJECT_ROOT=/home/amagrawal/memoized-regex-engine ECOSYSTEM_REGEXP_PROJECT_ROOT= python3 measure-memoization-behavior.py --regex-file=analyze.json --out-file=test.pkl.bz2 --queryPrototype
