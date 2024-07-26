@@ -1,0 +1,1 @@
+{"pattern": "^(array|hash|scalar)(?:_?ref)?\\s*(?:\\(\\s*(\\S+)\\s*\\))*$", "input": "hash(\r\r)(\r\r)(\r\r)(", "rleKValue": 1}

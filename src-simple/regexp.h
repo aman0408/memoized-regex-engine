@@ -190,7 +190,7 @@ enum	/* Inst.opcode */
 	RecursiveZeroWidthAssertion,
 };
 
-Prog *compile(Regexp*, int);
+Prog *compile(Regexp*, int, int, int*, int, int);
 void Prog_assertNoInfiniteLoops(Prog *p);
 void printprog(Prog*);
 

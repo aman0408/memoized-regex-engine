@@ -1,0 +1,3 @@
+{"pattern": "^(.+=)*(\\(+)$", "evilInputs": [{"pumpPairs": [{"prefix": "\uffff", "pump": "=\uffff"}], "suffix": ""} ], "rleKValue": 2}
+{"pattern": "^(.+=)*(\\(+)$", "evilInputs": [{"pumpPairs": [{"prefix": "\uffff", "pump": "=\uffff"}], "suffix": ""} ], "rleKValue": 1}
+{"pattern": "^(.+=)*(\\(+)$", "evilInputs": [{"pumpPairs": [{"prefix": "\uffff", "pump": "=\uffff"}], "suffix": ""} ], "rleKValue": 4}

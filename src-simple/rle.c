@@ -204,7 +204,7 @@ RLEVector_getNeighbors(RLEVector *vec, int ix)
   rnn.a = NULL;
   rnn.b = NULL;
   rnn.c = NULL;
-
+// int roundedIx = ix - RUN_OFFSET(ix, vec->nBitsInRun);
   target.offset = ix;
   target.nRuns = -1;
 
@@ -286,7 +286,7 @@ RLEVector_set(RLEVector *vec, int ix)
   int oldRunKernel = 0, newRunKernel = 0;
 	int roundedIx = ix - RUN_OFFSET(ix, vec->nBitsInRun);
 
-  logMsg(LOG_VERBOSE, "RLEVector_set: %d", ix);
+  logMsg(LOG_VERBOSE, "RLEVector_set: %d", roundedIx);
 
   if (vec->autoValidate)
     _RLEVector_validate(vec);
@@ -299,7 +299,7 @@ RLEVector_set(RLEVector *vec, int ix)
    * Update rnn.{a,b,c} as we go. */
   if (rnn.b == NULL) {
     /* Case: creates a run */
-    logMsg(LOG_DEBUG, "%d: Creating a run", ix);
+    logMsg(LOG_DEBUG, "%d: Creating a run", roundedIx);
 
     newRunKernel = MASK_FOR(ix, vec->nBitsInRun);
     newRun = RLENode_create(roundedIx, 1, newRunKernel, vec->nBitsInRun);
@@ -367,7 +367,7 @@ RLEVector_get(RLEVector *vec, int ix)
 {
   RLENode target;
   RLENode *match = NULL;
-
+// int roundedIx = ix - RUN_OFFSET(ix, vec->nBitsInRun);
   logMsg(LOG_DEBUG, "RLEVector_get: %d", ix);
 
   if (vec->autoValidate)
@@ -417,10 +417,20 @@ RLEVector_destroy(RLEVector *vec)
 
   return;
 }
-
+static void ullToBinaryString(unsigned long long value, char *buffer, int bufferSize) {
+    buffer[bufferSize - 1] = '\0';
+    int index = bufferSize - 2;
+    while (index >= 0) {
+        buffer[index] = (value % 2) ? '1' : '0';
+        value /= 2;
+        index--;
+    }
+}
 static void _RLEVector_addRun(RLEVector *vec, RLENode *node)
 {
-  logMsg(LOG_DEBUG, "Adding run (%d,%d,%llu)", node->offset, node->nRuns, node->run);
+  char runBinary[65]; // 64 bits + 1 for null terminator
+    ullToBinaryString(node->run, runBinary, sizeof(runBinary));
+  logMsg(LOG_DEBUG, "Adding run (%d,%d,%s)", node->offset, node->nRuns, runBinary);
 
 	assert(avl_tree_insert(&vec->root, &node->node, RLENode_avl_tree_cmp) == NULL);
   vec->currNEntries++;

@@ -42,7 +42,7 @@ PROTOTYPE_MEMO_MATCH_TIMEOUT = 180 # Seconds before timing out memoized queries 
 
 CHECK_TIME_COEFFICIENT_OF_VARIANCE = False
 
-SAVE_TMP_FILES = True
+SAVE_TMP_FILES = False
 
 EXPAND_EVIL_INPUT = True # Get more SL regexes, corrects some common errors
 
@@ -297,7 +297,7 @@ class MyTask(libLF.parallel.ParallelTask): # Not actually parallel, but keep the
     
     Returns: automatonSize (integer), phiSize (integer), time (numeric), algoSpace (numeric), bytesSpace (numeric)
     """
-    queryFile = libMemo.ProtoRegexEngine.buildQueryFile(regex.pattern, mostEI.build(nPumps, maxAttackStringLen)[0])
+    queryFile = libMemo.ProtoRegexEngine.buildQueryFile(regex.pattern, mostEI.build(nPumps, maxAttackStringLen)[0], rleKValue=regex.rleKValue)
 
     measures = []
     for i in range(0, nTrialsPerCondition):
@@ -394,6 +394,7 @@ class MyTask(libLF.parallel.ParallelTask): # Not actually parallel, but keep the
       # Prep an MDA
       mda = libMemo.MemoizationDynamicAnalysis()
       mda.pattern = regex.pattern
+      mda.rleKValue = regex.rleKValue
       mda.inputLength = len(mostEI.build(nPumps)[0])
       mda.evilInput = mostEI
       mda.nPumps = nPumps
@@ -518,6 +519,8 @@ class MyTask(libLF.parallel.ParallelTask): # Not actually parallel, but keep the
       libLF.log("SL regex: /{}/".format(regex.pattern))
     else:
       libLF.log("False SL regex: /{}/".format(regex.pattern))
+      with open('nonSL.txt', 'a') as f:
+            f.write(regex.pattern + '\n')
 
     return eiWithLargestGrowthRate, eiLargestGrowthRate
 
@@ -623,6 +626,7 @@ def main(regexFile, useCSharpToFindMostEI, perfPumps, maxAttackStringLen, queryP
 
   #### Emit results
   libLF.log('Writing results to {}'.format(outFile))
+  # df.to_csv(outFile)
   df.to_pickle(outFile)
   libLF.log("Data columns: {}".format(df.columns))
 

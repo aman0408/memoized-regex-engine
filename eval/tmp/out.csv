@@ -1,0 +1,10 @@
+,SL,csharpBehavior,encodingPolicy,nPumps,pattern,perlBehavior,phpBehavior,productionEnginePumps,selectionPolicy,spaceCostAlgo,spaceCostBytes,timeCost,|Phi_{in-deg > 1}|,|Phi_{quantifier}|,|Q|,|w|
+0,True,,no encoding,20000,^<span[^>]*font-style:italic[^>]*>$,,,-1,selective: loop,680012,85002,62589,2,2,34,340006
+1,True,,negative encoding,20000,^<span[^>]*font-style:italic[^>]*>$,,,-1,selective: loop,679985,106306512,423508,2,2,34,340006
+2,True,,RLE,20000,^<span[^>]*font-style:italic[^>]*>$,,,-1,selective: loop,5,288,109125,2,2,34,340006
+3,True,,no encoding,20000,^<span[^>]*font-style:italic[^>]*>$,,,-1,full memoization,11560204,1445034,142952,2,2,34,340006
+4,True,,negative encoding,20000,^<span[^>]*font-style:italic[^>]*>$,,,-1,full memoization,3039945,471306544,1934990,2,2,34,340006
+5,True,,RLE,20000,^<span[^>]*font-style:italic[^>]*>$,,,-1,full memoization,320026,15362064,400743,2,2,34,340006
+6,True,,no encoding,20000,^<span[^>]*font-style:italic[^>]*>$,,,-1,selective: indeg>1,680012,85002,62558,2,2,34,340006
+7,True,,negative encoding,20000,^<span[^>]*font-style:italic[^>]*>$,,,-1,selective: indeg>1,679985,106306512,432874,2,2,34,340006
+8,True,,RLE,20000,^<span[^>]*font-style:italic[^>]*>$,,,-1,selective: indeg>1,5,288,108847,2,2,34,340006

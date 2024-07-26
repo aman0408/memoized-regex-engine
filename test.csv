@@ -1,0 +1,13 @@
+,SL,csharpBehavior,encodingPolicy,nPumps,pattern,perlBehavior,phpBehavior,productionEnginePumps,selectionPolicy,spaceCostAlgo,spaceCostBytes,timeCost,|Phi_{in-deg > 1}|,|Phi_{quantifier}|,|Q|,|w|
+0,True,,RLE,20000,^regex:(.+)+$,,,-1,full memoization,21,1392,106806,2,2,16,160010
+1,True,,RLE-tuned,20000,^regex:(.+)+$,,,-1,full memoization,26,1632,131065,2,2,16,160010
+2,True,,no encoding,20000,^regex:(.+)+$,,,-1,full memoization,2560160,320032,41203,2,2,16,160010
+3,True,,negative encoding,20000,^regex:(.+)+$,,,-1,full memoization,960022,146631840,538043,2,2,16,160010
+4,True,,RLE,20000,^regex:(.+)+$,,,-1,selective: indeg>1,5,288,52370,2,2,16,160010
+5,True,,RLE-tuned,20000,^regex:(.+)+$,,,-1,selective: indeg>1,7,384,60149,2,2,16,160010
+6,True,,no encoding,20000,^regex:(.+)+$,,,-1,selective: indeg>1,320020,40004,27754,2,2,16,160010
+7,True,,negative encoding,20000,^regex:(.+)+$,,,-1,selective: indeg>1,320006,48178080,187330,2,2,16,160010
+8,True,,RLE,20000,^regex:(.+)+$,,,-1,selective: loop,5,288,51570,2,2,16,160010
+9,True,,RLE-tuned,20000,^regex:(.+)+$,,,-1,selective: loop,7,384,59881,2,2,16,160010
+10,True,,no encoding,20000,^regex:(.+)+$,,,-1,selective: loop,320020,40004,27848,2,2,16,160010
+11,True,,negative encoding,20000,^regex:(.+)+$,,,-1,selective: loop,320006,48178080,185872,2,2,16,160010
