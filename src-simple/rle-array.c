@@ -189,7 +189,7 @@ void RLEVector_print(RLEVector *vec)
 {
   for (int i = 0; i < (vec->currNumOfRuns); i++)
   {
-    printf("Group Value: ");
+    printf("Value: ");
     for (int j = vec->nBitsInRun - 1; j >= 0; j--)
     {
       printf("%d", (vec->compressed[i].value >> j) & 1);

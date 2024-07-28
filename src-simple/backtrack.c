@@ -473,7 +473,8 @@ CleanupAndRet:
       printf("\n");
     }
   }
-  else if (memo.encoding == ENCODING_RLE) {
+  else if (memo.encoding == ENCODING_RLE || memo.encoding == ENCODING_RLE_TUNED)
+  {
     for (int i = 0; i < prog->nMemoizedStates; i++)
     {
       printf("%d) ", i);
