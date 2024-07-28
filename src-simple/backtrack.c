@@ -84,7 +84,7 @@ ThreadVec_pop(ThreadVec *tv)
   Thread t;
   assert(tv->nThreads > 0);
 
-  t = tv->threads[tv->nThreads-1];
+  t = tv->threads[tv->nThreads - 1];
   logMsg(LOG_VERBOSE, "TV: Popping t %d (pc %p, sp %p, sub %p)", tv->nThreads, t.pc, t.sp, t.sub);
 
   tv->nThreads--;
@@ -98,8 +98,8 @@ ThreadVec_push(ThreadVec *tv, Thread t)
   if (tv->nThreads == tv->maxThreads)
     ThreadVec_realloc(tv);
 
-  logMsg(LOG_VERBOSE, "TV: Pushing t %d (pc %p, sp %p, sub %p)", tv->nThreads+1, t.pc, t.sp, t.sub);
-  tv->threads[ tv->nThreads ] = t;
+  logMsg(LOG_VERBOSE, "TV: Pushing t %d (pc %p, sp %p, sub %p)", tv->nThreads + 1, t.pc, t.sp, t.sub);
+  tv->threads[tv->nThreads] = t;
   tv->nThreads++;
   assert(tv->nThreads <= tv->maxThreads);
 }
@@ -113,26 +113,29 @@ _inCharClass(Inst *pc, char c)
   int inThisRange = 0, inAnyInstCharRange = 0;
 
   // Test for membership in each of the CharRange conditions
-  for (i = 0; i < pc->charRangeCounts; i++) {
+  for (i = 0; i < pc->charRangeCounts; i++)
+  {
     logMsg(LOG_DEBUG, "testing range %d of %d (inv this one? %d)", i, pc->charRangeCounts, pc->invert ? 1 : 0);
     inThisRange = 0;
-    for (j = 0; j < pc->charRanges[i].count; j++) {
+    for (j = 0; j < pc->charRanges[i].count; j++)
+    {
       logMsg(LOG_DEBUG, "testing range %d.%d: [%d, %d]", i, j, pc->charRanges[i].lows[j], pc->charRanges[i].highs[j]);
-      inThisRange += pc->charRanges[i].lows[j] <= (int) c && (int) c <= pc->charRanges[i].highs[j];
+      inThisRange += pc->charRanges[i].lows[j] <= (int)c && (int)c <= pc->charRanges[i].highs[j];
     }
 
     // Invert the inner formula
     if (pc->charRanges[i].invert)
       inThisRange = !inThisRange;
 
-    if (inThisRange) {
+    if (inThisRange)
+    {
       logMsg(LOG_VERBOSE, "in range %d", i);
       inAnyInstCharRange = 1;
     }
   }
 
   // Apply top-level inversion
-  if ( (inAnyInstCharRange && !pc->invert) || (!inAnyInstCharRange && pc->invert) )
+  if ((inAnyInstCharRange && !pc->invert) || (!inAnyInstCharRange && pc->invert))
     return 1;
   return 0;
 }
@@ -143,7 +146,8 @@ _stringCompare(Inst *pc, Sub *sub, char *sp, char *inputEOL)
   static char msg[128];
 
   // CG is not set -- match the empty string
-  if (sub->sub[CGID_TO_SUB_STARTP_IX(pc->cgNum)] == nil || sub->sub[CGID_TO_SUB_ENDP_IX(pc->cgNum)] == nil) {
+  if (sub->sub[CGID_TO_SUB_STARTP_IX(pc->cgNum)] == nil || sub->sub[CGID_TO_SUB_ENDP_IX(pc->cgNum)] == nil)
+  {
     logMsg(LOG_DEBUG, "CG %d not set yet (startpix %d endpix %d). We match the empty string", pc->cgNum, CGID_TO_SUB_STARTP_IX(pc->cgNum), CGID_TO_SUB_ENDP_IX(pc->cgNum));
     return 0;
   }
@@ -153,19 +157,23 @@ _stringCompare(Inst *pc, Sub *sub, char *sp, char *inputEOL)
   char *begin = CGID_TO_STARTP(sub, pc->cgNum);
   char *end = CGID_TO_ENDP(sub, pc->cgNum);
   int charsRemaining = inputEOL - sp;
-  logMsg(LOG_DEBUG, "charsRemaining %d end-begin %d", charsRemaining, end-begin);
+  logMsg(LOG_DEBUG, "charsRemaining %d end-begin %d", charsRemaining, end - begin);
 
-  if (charsRemaining >= end - begin) {
-    if (memcmp(begin, sp, end - begin) == 0) {
+  if (charsRemaining >= end - begin)
+  {
+    if (memcmp(begin, sp, end - begin) == 0)
+    {
       logMsg(LOG_DEBUG, "StringCompare matched (%d chars)", end - begin);
       return end - begin;
     }
-    else {
+    else
+    {
       sprintf(msg, "mismatch (%ld chars)", end - begin);
     }
   }
-  else {
-      sprintf(msg, "Remaining string too short");
+  else
+  {
+    sprintf(msg, "Remaining string too short");
   }
 
   logMsg(LOG_DEBUG, "Backref mismatch: %s", msg);
@@ -176,7 +184,8 @@ static int
 _testInlineZeroWidthAssertion(Inst *pc, char *sp, int isBegin, int isEnd)
 {
   int satisfied = 0;
-  switch (pc->c) {
+  switch (pc->c)
+  {
   case 'b':
   case 'B':
     logMsg(LOG_DEBUG, "  wordBoundary");
@@ -184,12 +193,15 @@ _testInlineZeroWidthAssertion(Inst *pc, char *sp, int isBegin, int isEnd)
     // Python: \b is defined as the boundary between:
     //   (1) \w and a \W character
     //   (2) \w and begin/end of the string
-    if (isBegin || isEnd) {
+    if (isBegin || isEnd)
+    {
       // Condition (2)
       isWordBoundary = 1;
-    } else {
+    }
+    else
+    {
       // Condition (1) -- dereference is safe because we tested Condition (2) already
-      int prev_c = *(sp-1);
+      int prev_c = *(sp - 1);
       int curr_c = *sp;
 
       // TODO This re-defines \w and \W in terms of IS_WORD_CHAR instead of in terms of ranges
@@ -198,11 +210,14 @@ _testInlineZeroWidthAssertion(Inst *pc, char *sp, int isBegin, int isEnd)
       int curr_w = IS_WORD_CHAR(curr_c);
 
       isWordBoundary = (prev_w ^ curr_w);
-    } 
+    }
 
-    if (isWordBoundary && pc->c == 'b') {
+    if (isWordBoundary && pc->c == 'b')
+    {
       satisfied = 1;
-    } else if (!isWordBoundary && pc->c == 'B') {
+    }
+    else if (!isWordBoundary && pc->c == 'B')
+    {
       satisfied = 1;
     }
     break;
@@ -229,22 +244,21 @@ _testInlineZeroWidthAssertion(Inst *pc, char *sp, int isBegin, int isEnd)
 static int
 woffset(char *input, char *sp)
 {
-  return (int) (sp - input);
+  return (int)(sp - input);
 }
 
-int
-backtrack(Prog *prog, char *input, /* start-end pointers for each CG */ char **subp, /* Length of subp */ int nsubp)
+int backtrack(Prog *prog, char *input, /* start-end pointers for each CG */ char **subp, /* Length of subp */ int nsubp)
 {
   Memo memo;
   VisitTable visitTable;
   int i;
-  Inst *pc; /* Current position in VM (pc) */
-  char *sp; /* Current position in input */
-  Sub *sub; /* submatch (capture group) */
+  Inst *pc;       /* Current position in VM (pc) */
+  char *sp;       /* Current position in input */
+  Sub *sub;       /* submatch (capture group) */
   char *inputEOL; /* Position of \0 terminating input */
   uint64_t startTime;
   ThreadVec *threads = NULL;
-	int matched = 0;
+  int matched = 0;
 
   int inZWA = 0;
   char *sp_save = NULL;
@@ -254,7 +268,7 @@ backtrack(Prog *prog, char *input, /* start-end pointers for each CG */ char **s
 
   /* Prep sub-captures */
   sub = newsub(nsubp, input);
-  for(i=0; i<nsubp; i++)
+  for (i = 0; i < nsubp; i++)
     sub->sub[i] = nil;
 
   /* Prep memo structures */
@@ -275,18 +289,22 @@ backtrack(Prog *prog, char *input, /* start-end pointers for each CG */ char **s
 
   /* Run threads in stack order */
 BACKTRACKING_SEARCH:
-  while(threads->nThreads > 0) {
+  while (threads->nThreads > 0)
+  {
     Thread next = ThreadVec_pop(threads);
     pc = next.pc;
     sp = next.sp;
     sub = next.sub;
     assert(sub->ref > 0);
-    for(;;) { /* Run thread to completion */
+    for (;;)
+    { /* Run thread to completion */
       logMsg(LOG_VERBOSE, "  search state: <%d (M: %d), %d>", pc->stateNum, pc->memoInfo.memoStateNum, woffset(input, sp));
 
-      if (prog->memoMode != MEMO_NONE && pc->memoInfo.memoStateNum >= 0) {
+      if (prog->memoMode != MEMO_NONE && pc->memoInfo.memoStateNum >= 0)
+      {
         /* Check if we've been here. */
-        if (isMarked(&memo, pc->memoInfo.memoStateNum, woffset(input, sp), sub)) {
+        if (isMarked(&memo, pc->memoInfo.memoStateNum, woffset(input, sp), sub))
+        {
           /* Since we return on first match, the prior visit failed.
            * Short-circuit thread */
           logMsg(LOG_VERBOSE, "marked, short-circuiting thread");
@@ -302,15 +320,16 @@ BACKTRACKING_SEARCH:
       markVisit(&visitTable, pc->stateNum, woffset(input, sp));
 
       /* Proceed as normal */
-      switch(pc->opcode) {
+      switch (pc->opcode)
+      {
       case Char:
-        if(*sp != pc->c)
+        if (*sp != pc->c)
           goto Dead;
         pc++;
         sp++;
         continue;
       case Any:
-        if(*sp == 0 || *sp == '\n' || *sp == '\r')
+        if (*sp == 0 || *sp == '\n' || *sp == '\r')
           goto Dead;
         pc++;
         sp++;
@@ -320,25 +339,27 @@ BACKTRACKING_SEARCH:
           goto Dead;
         /* Look through char class mins/maxes */
         logMsg(LOG_VERBOSE, "Does char %d match CC? charClassCounts %d",
-          *sp, pc->charRangeCounts);
+               *sp, pc->charRangeCounts);
 
-        if (!_inCharClass(pc, *sp)) {
+        if (!_inCharClass(pc, *sp))
+        {
           logMsg(LOG_VERBOSE, "not in char class");
           goto Dead;
         }
         logMsg(LOG_VERBOSE, "char %d matched CC", *sp);
         pc++;
-        sp++;  
+        sp++;
         continue;
       case Match:
         logMsg(LOG_VERBOSE, "Match: eolAnchor %d sp %p inputEOL %p", prog->eolAnchor, sp, inputEOL);
-        if (!prog->eolAnchor || (prog->eolAnchor && sp == inputEOL)) {
-          for(i=0; i<nsubp; i++)
+        if (!prog->eolAnchor || (prog->eolAnchor && sp == inputEOL))
+        {
+          for (i = 0; i < nsubp; i++)
             subp[i] = sub->sub[i];
           decref(sub);
 
-					matched = 1;
-					goto CleanupAndRet;
+          matched = 1;
+          goto CleanupAndRet;
         }
         goto Dead;
       case Jmp:
@@ -346,13 +367,14 @@ BACKTRACKING_SEARCH:
         continue;
       case Split: /* Non-deterministic choice */
         ThreadVec_push(threads, thread(pc->y, sp, incref(sub)));
-        pc = pc->x;  /* continue current thread */
+        pc = pc->x; /* continue current thread */
         continue;
       case SplitMany: /* Non-deterministic choice */
-        for (i = 1; i < pc->arity; i++) {
+        for (i = 1; i < pc->arity; i++)
+        {
           ThreadVec_push(threads, thread(pc->edges[i], sp, incref(sub)));
         }
-        pc = pc->edges[0];  /* continue current thread */
+        pc = pc->edges[0]; /* continue current thread */
         continue;
       case Save:
         logMsg(LOG_DEBUG, "  save %d at %p", pc->n, sp);
@@ -364,7 +386,8 @@ BACKTRACKING_SEARCH:
         /* Check if appropriate sub matches */
         logMsg(LOG_DEBUG, "  StringCompare on %d at %p", pc->cgNum, sp);
         int nCharsMatched = _stringCompare(pc, sub, sp, inputEOL);
-        if (nCharsMatched > -1) {
+        if (nCharsMatched > -1)
+        {
           sp += nCharsMatched;
           pc++;
           continue;
@@ -374,12 +397,13 @@ BACKTRACKING_SEARCH:
       }
       case InlineZeroWidthAssertion:
       {
-        if (_testInlineZeroWidthAssertion(pc, sp, sp == input, sp == inputEOL)) {
+        if (_testInlineZeroWidthAssertion(pc, sp, sp == input, sp == inputEOL))
+        {
           pc++;
           continue;
         }
 
-				logMsg(LOG_DEBUG, "InlineZWA %c unsatisfied", pc->c);
+        logMsg(LOG_DEBUG, "InlineZWA %c unsatisfied", pc->c);
         goto Dead;
       }
       case RecursiveZeroWidthAssertion:
@@ -391,16 +415,16 @@ BACKTRACKING_SEARCH:
         threads_save = threads;
 
         // Override
-        Inst *newPC = pc+1;
+        Inst *newPC = pc + 1;
         ThreadVec override = ThreadVec_alloc();
         ThreadVec_push(&override, thread(newPC, sp, sub));
         threads = &override;
-        logMsg(LOG_DEBUG, "Overriding threads %p with %p -- a sub-simulation starting at <q%d, i%d>", threads_save, threads, (int)(newPC-prog->start), (int)(sp - input));
+        logMsg(LOG_DEBUG, "Overriding threads %p with %p -- a sub-simulation starting at <q%d, i%d>", threads_save, threads, (int)(newPC - prog->start), (int)(sp - input));
         goto BACKTRACKING_SEARCH;
       }
         assert(!"unreachable");
       case RecursiveMatch:
-        logMsg(LOG_DEBUG, "Made it to %d RecursiveMatch", (int)(pc-prog->start));
+        logMsg(LOG_DEBUG, "Made it to %d RecursiveMatch", (int)(pc - prog->start));
         // Restore state: i, backtrack stack
         assert(inZWA);
         inZWA = 0;
@@ -411,7 +435,7 @@ BACKTRACKING_SEARCH:
         threads_save = nil;
 
         pc++; // Advance beyond the ZWA
-        logMsg(LOG_DEBUG, "Resuming execution at <q%d, i%d>\n", (int)(pc-prog->start), (int)(sp-input));
+        logMsg(LOG_DEBUG, "Resuming execution at <q%d, i%d>\n", (int)(pc - prog->start), (int)(sp - input));
         continue; // Pick up where we left off
 
       default:
@@ -422,7 +446,8 @@ BACKTRACKING_SEARCH:
     decref(sub);
   }
   // Backtracking stack is exhausted.
-  if (inZWA) {
+  if (inZWA)
+  {
     // No way to honor the ZWA from this point. Backtrack.
     logMsg(LOG_INFO, "Could not honor ZWA");
     inZWA = 0;
@@ -432,24 +457,35 @@ BACKTRACKING_SEARCH:
     threads_save = nil;
     goto BACKTRACKING_SEARCH;
   }
-	matched = 0;
+  matched = 0;
 
 CleanupAndRet:
-	//decref(&sub);
-  if(memo.encoding == MEMO_NONE){
-for (int i = 0; i < prog->nMemoizedStates; i++) {  
-    printf("%d) ", i);
-    for (int j = 0; j < (strlen(input) + 1); j++) {
-      printf("%d ", memo.visitVectors[i][j]);
+  // decref(&sub);
+  if (memo.encoding == ENCODING_NONE)
+  {
+    for (int i = 0; i < prog->nMemoizedStates; i++)
+    {
+      printf("%d) ", i);
+      for (int j = 0; j < (strlen(input) + 1); j++)
+      {
+        printf("%d ", memo.visitVectors[i][j]);
+      }
+      printf("\n");
     }
-    printf("\n");
   }
+  else if (memo.encoding == ENCODING_RLE) {
+    for (int i = 0; i < prog->nMemoizedStates; i++)
+    {
+      printf("%d) ", i);
+      RLEVector_print(memo.rleVectors[i]);
+      printf("\n");
+    }
   }
-  
-  printStats(prog, &memo, &visitTable, startTime, sub);
+
+    printStats(prog, &memo, &visitTable, startTime, sub);
   ThreadVec_free(&ready);
   freeVisitTable(visitTable);
   freeMemoTable(memo);
-  
+
   return matched;
 }

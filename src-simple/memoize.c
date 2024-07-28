@@ -306,7 +306,8 @@ initMemoTable(Prog *prog, int nChars)
               visitInterval = 1;
             //visitInterval = 60;
             logMsg(LOG_INFO, "%s: state %d (memo state %d) will use visitInterval %d", prefix, j, i, visitInterval);
-            memo.rleVectors[i] = RLEVector_create(visitInterval, 0 /* Do not auto-validate */);
+            // memo.rleVectors[i] = RLEVector_create(visitInterval, 0 /* Do not auto-validate */);
+            memo.rleVectors[i] = RLEVector_create(nChars, visitInterval);
             break;
           }
         }

@@ -11,7 +11,8 @@
 #include <stdarg.h>
 #include <assert.h>
 #include "uthash.h"
-#include "rle.h"
+// #include "rle.h"
+#include "rle-array.h"
 
 #define nil ((void*)0)
 #define nelem(x) (sizeof(x)/sizeof((x)[0]))

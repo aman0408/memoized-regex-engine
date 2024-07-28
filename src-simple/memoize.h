@@ -6,8 +6,8 @@
 #define MEMOIZE_H
 
 #include "regexp.h"
-#include "rle.h"
-
+// #include "rle.h"
+#include "rle-array.h"
 /* Memoization-related compilation phase. */
 
 void Prog_determineMemoNodes(Prog *p, int memoMode);

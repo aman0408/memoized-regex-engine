@@ -130,7 +130,7 @@ printStats(Prog *prog, Memo *memo, VisitTable *visitTable, uint64_t startTime, S
   logMsg(LOG_INFO, "%s: Most-visited search state: <%d, %d> (%d visits)", prefix, vertexWithMostVisitedSimPos, mostVisitedOffset, maxVisitsPerSimPos);
   logMsg(LOG_INFO, "%s: Most-visited vertex: %d (%d visits over all its search states)", prefix, mostVisitedVertex, maxVisitsPerVertex);
   /* Info about simulation */
-  fprintf(stderr, ", \"simulationInfo\": { \"nTotalVisits\": %d, \"nPossibleTotalVisitsWithMemoization\": %d, \"visitsToMostVisitedSimPos\": %d, \"visitsToMostVisitedVertex\": %d, \"simTimeUS\": %llu }",
+  fprintf(stderr, ", \"simulationInfo\": { \"nTotalVisits\": %d, \"nPossibleTotalVisitsWithMemoization\": %d, \"visitsToMostVisitedSimPos\": %d, \"visitsToMostVisitedVertex\": %d, \"simTimeUS\": %ld }",
     nTotalVisits, visitTable->nStates * visitTable->nChars, maxVisitsPerSimPos, maxVisitsPerVertex, elapsed_US);
 
   if (memo->mode == MEMO_FULL || memo->mode == MEMO_IN_DEGREE_GT1) {
