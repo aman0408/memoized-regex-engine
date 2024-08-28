@@ -297,7 +297,7 @@ class MyTask(libLF.parallel.ParallelTask): # Not actually parallel, but keep the
     
     Returns: automatonSize (integer), phiSize (integer), time (numeric), algoSpace (numeric), bytesSpace (numeric)
     """
-    queryFile = libMemo.ProtoRegexEngine.buildQueryFile(regex.pattern, mostEI.build(nPumps, maxAttackStringLen)[0], rleKValue=regex.rleKValue)
+    queryFile = libMemo.ProtoRegexEngine.buildQueryFile(regex.pattern, mostEI.build(nPumps, maxAttackStringLen)[0], rleValues=regex.rleValues)
 
     measures = []
     for i in range(0, nTrialsPerCondition):
@@ -394,7 +394,8 @@ class MyTask(libLF.parallel.ParallelTask): # Not actually parallel, but keep the
       # Prep an MDA
       mda = libMemo.MemoizationDynamicAnalysis()
       mda.pattern = regex.pattern
-      mda.rleKValue = regex.rleKValue
+      # mda.rleKValue = regex.rleKValue
+      # mda.rleValues = regex.rleValues
       mda.inputLength = len(mostEI.build(nPumps)[0])
       mda.evilInput = mostEI
       mda.nPumps = nPumps
@@ -615,7 +616,7 @@ def main(regexFile, useCSharpToFindMostEI, perfPumps, maxAttackStringLen, queryP
       if df is None:
         df = res
       else:
-        df = df.append(res)
+        df = df._append(res)
     elif type(res) is type(MyTask.NOT_SL) and res == MyTask.NOT_SL:
       nNonSL += 1
     else:
@@ -626,8 +627,8 @@ def main(regexFile, useCSharpToFindMostEI, perfPumps, maxAttackStringLen, queryP
 
   #### Emit results
   libLF.log('Writing results to {}'.format(outFile))
-  # df.to_csv(outFile)
-  df.to_pickle(outFile)
+  df.to_csv(outFile)
+  # df.to_pickle(outFile)
   libLF.log("Data columns: {}".format(df.columns))
 
 #####################################################

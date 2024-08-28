@@ -56,7 +56,7 @@ class ProtoRegexEngine:
         all = scheme2cox.keys()
 
     @staticmethod
-    def buildQueryFile(pattern, input, filePrefix="protoRegexEngineQueryFile-", rleKValue=1):
+    def buildQueryFile(pattern, input, filePrefix="protoRegexEngineQueryFile-", rleValues=[]):
         """Build a query file
         
         pattern: string
@@ -71,7 +71,7 @@ class ProtoRegexEngine:
             json.dump({
                 "pattern": pattern,
                 "input": input,
-                "rleKValue": rleKValue
+                "rleValues": rleValues
             }, outStream)
         return name
 
@@ -155,13 +155,15 @@ class SimpleRegex:
   def __init__(self):
     self.pattern = None
     self.evilInputs = []
-    self.rleKValue = 1
+    # self.rleKValue = 1
+    self.rleValues = []
     return
   
   def initFromNDJSON(self, line):
     obj = json.loads(line)
     self.pattern = obj['pattern']
-    self.rleKValue = obj['rleKValue']
+    # self.rleKValue = obj['rleKValue']
+    self.rleValues = obj['k_values']
     self.evilInputs = []
     if 'evilInputs' in obj:
       for _ei in obj['evilInputs']:
@@ -217,7 +219,8 @@ class MemoizationDynamicAnalysis:
     self.phiInDeg = -1
     self.phiQuantifier = -1
     self.inputLength = -1
-    self.rleKValue = 1
+    # self.rleKValue = 1
+    self.rleValues = []
     self.evilInput = None # If an SL regex
     self.nPumps = -1 # If an SL regex
 
@@ -346,7 +349,7 @@ class MemoizationDynamicAnalysis:
           "selectionPolicy": selectionPolicy,
           "encodingPolicy": encodingPolicy,
           "timeCost": self.selectionPolicy_to_enc2time[selectionPolicy][encodingPolicy],
-          "rleKValue": self.rleKValue,
+          # "rleKValue": self.rleKValue,
           "spaceCostAlgo": self.selectionPolicy_to_enc2spaceAlgo[selectionPolicy][encodingPolicy],
           "spaceCostBytes": self.selectionPolicy_to_enc2spaceBytes[selectionPolicy][encodingPolicy],
         })

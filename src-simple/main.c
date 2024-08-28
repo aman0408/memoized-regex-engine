@@ -100,17 +100,18 @@ loadQuery(char *inFile)
 	q.input = strdup(key->valuestring);
 	logMsg(LOG_INFO, "input: <%s>", q.input);
 	logMsg(LOG_INFO, "length: %zu", strlen(q.input));
-	// key = cJSON_GetObjectItem(parsedJson, "rleValues");
-	// int array_size = cJSON_GetArraySize(key);
-	// int *int_array = malloc(array_size * sizeof(int));
-	// for (int i = 0; i < array_size; i++) {
-    //     cJSON *item = cJSON_GetArrayItem(key, i);
-	// 	int_array[i] = item->valueint;
-    // }
-	// q.rleValues = int_array;
-	// q.rleValuesLength = array_size;
-	key = cJSON_GetObjectItem(parsedJson, "rleKValue");
-	q.singleRleK = key->valueint;
+	key = cJSON_GetObjectItem(parsedJson, "rleValues");
+	int array_size = cJSON_GetArraySize(key);
+	int *int_array = malloc(array_size * sizeof(int));
+	for (int i = 0; i < array_size; i++) {
+        cJSON *item = cJSON_GetArrayItem(key, i);
+		int_array[i] = item->valueint;
+    }
+	q.rleValues = int_array;
+	q.rleValuesLength = array_size;
+	printf("Length %d\n", q.rleValuesLength);
+	// key = cJSON_GetObjectItem(parsedJson, "rleKValue");
+	// q.singleRleK = key->valueint;
 	cJSON_Delete(parsedJson);
 	free(rawJson);
 	return q;
