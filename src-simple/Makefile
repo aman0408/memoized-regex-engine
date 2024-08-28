@@ -21,7 +21,7 @@ OFILES=\
 	y.tab.o\
 	vendor/avl_tree.o\
 	vendor/cJSON.o\
-	rle-array.o\
+	rle.o\
 	log.o\
 
 RLE_TEST_OFILES=\
@@ -34,7 +34,7 @@ HFILES=\
 	y.tab.h\
 	vendor/avl_tree.h\
 	vendor/cJSON.h\
-	rle-array.h\
+	rle.h\
 	log.h\
 
 re: $(OFILES)

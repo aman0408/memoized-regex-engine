@@ -475,12 +475,13 @@ CleanupAndRet:
   }
   else if (memo.encoding == ENCODING_RLE || memo.encoding == ENCODING_RLE_TUNED)
   {
-    for (int i = 0; i < prog->nMemoizedStates; i++)
-    {
-      printf("%d) ", i);
-      RLEVector_print(memo.rleVectors[i]);
-      printf("\n");
-    }
+    // for (int i = 0; i < prog->nMemoizedStates; i++)
+    // {
+    //   printf("%d) ", i);
+    //   // RLEVector_print(memo.rleVectors[i]);
+    //   printAllRunsInBinary(memo.rleVectors[i]);
+    //       printf("\n");
+    // }
   }
 
     printStats(prog, &memo, &visitTable, startTime, sub);

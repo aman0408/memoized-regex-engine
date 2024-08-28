@@ -29,14 +29,39 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stdlib.h>
 #include <stdio.h>
 
-#define BIT_ISSET(x, i) ( ( (x) & ( (1) << (i) ) ) != 0 )
-#define BIT_SET(x, i) ( (x) | ( (1) << (i) ) ) /* Returns with bit set */
+#define BIT_ISSET(x, i) (((x) & ((1) << (i))) != 0)
+#define BIT_SET(x, i) ((x) | ((1) << (i))) /* Returns with bit set */
 /* Offset within a k-bit run. [0, bitsPerRun). */
-#define RUN_OFFSET(ix, bitsPerRun) ( (ix) % (bitsPerRun) ) 
-#define MASK_FOR(ix, bitsPerRun) ( BIT_SET(0, RUN_OFFSET(ix, bitsPerRun)) )
+#define RUN_OFFSET(ix, bitsPerRun) ((ix) % (bitsPerRun))
+#define MASK_FOR(ix, bitsPerRun) (BIT_SET(0, RUN_OFFSET(ix, bitsPerRun)))
 /* Run number within a repeating sequence of k-bit runs. [0, nRuns). */
-#define RUN_NUMBER(ix, rleStart, bitsPerRun) ( ( (ix) - (rleStart) ) / (bitsPerRun) )
+#define RUN_NUMBER(ix, rleStart, bitsPerRun) (((ix) - (rleStart)) / (bitsPerRun))
+#define SET_BIT(arr, bit) (arr[(bit) / 64] |= (1ULL << ((bit) % 64)))
+// #define CLEAR_BIT(arr, bit) (arr[(bit) / 64] &= ~(1ULL << ((bit) % 64)))
+#define GET_BIT(arr, bit) ((arr[(bit) / 64] >> ((bit) % 64)) & 1)
 
+static void setBitInRun(unsigned long long *run, int bit)
+{
+  SET_BIT(run, bit);
+}
+
+// static void clearBitInRun(unsigned long long *run, int bit)
+// {
+//   CLEAR_BIT(run, bit);
+// }
+
+static int getBitInRun(const unsigned long long *run, int bit)
+{
+  return GET_BIT(run, bit);
+}
+
+static void copyRun(unsigned long long *dest, const unsigned long long *src, int nLongLongs)
+{
+  for (int i = 0; i < nLongLongs; i++)
+  {
+    dest[i] = src[i];
+  }
+}
 /* Internal API: RLENode */
 typedef struct RLENode RLENode;
 
@@ -48,13 +73,13 @@ static void _RLEVector_removeRun(RLEVector *vec, RLENode *node);
 struct RLENode
 {
   int offset; /* Key */
-  int nRuns;  
+  int nRuns;
 
   /* A bit representation of the run sequence.
    * We look at bits 0, 1, 2, 3, ... (right-to-left).  */
-  unsigned long long run; /* 64 bits -- does this need to be longer? */
-  int nBitsInRun; /* How many bits to look at */
-
+  unsigned long long *run; /* 64 bits -- does this need to be longer? */
+  int nBitsInRun;          /* How many bits to look at */
+  int nULLsInRun;          /* Number of unsigned long long integers in the run */
   struct avl_tree_node node;
 };
 
@@ -80,38 +105,49 @@ RLENode_contains(RLENode *node, int ix)
 static int
 RLENode_canMerge(RLENode *l, RLENode *r)
 {
-  return (l->run == r->run) && \
-    RLENode_end(l) == r->offset;
+  for (int i = 0; i < l->nULLsInRun; i++)
+  {
+    if (l->run[i] != r->run[i])
+    {
+      return 0;
+    }
+  }
+  return RLENode_end(l) == r->offset;
 }
 
 /* Returns 0 if target's offset lies within curr. */
-int
-RLENode_avl_tree_cmp(const struct avl_tree_node *target, const struct avl_tree_node *curr)
+int RLENode_avl_tree_cmp(const struct avl_tree_node *target, const struct avl_tree_node *curr)
 {
   RLENode *_target = avl_tree_entry(target, RLENode, node);
   RLENode *_curr = avl_tree_entry(curr, RLENode, node);
 
-	// printf("tree_cmp: target %d curr (%d, %d)\n", _target->offset, _curr->offset, _curr->nRuns);
-  if (_target->offset < _curr->offset) {
+  // printf("tree_cmp: target %d curr (%d, %d)\n", _target->offset, _curr->offset, _curr->nRuns);
+  if (_target->offset < _curr->offset)
+  {
     return -1;
-  } else if (RLENode_contains(_curr, _target->offset)) {
+  }
+  else if (RLENode_contains(_curr, _target->offset))
+  {
     /* _target falls within _curr */
     return 0;
-  } else {
+  }
+  else
+  {
     /* _target falls after _curr */
     return 1;
   }
 }
 
 static RLENode *
-RLENode_create(int offset, int nRuns, unsigned long long run, int nBitsInRun)
+RLENode_create(int offset, int nRuns, unsigned long long *run, int nBitsInRun, int nULLsInRun)
 {
   RLENode *node = malloc(sizeof *node);
   node->offset = offset;
   node->nRuns = nRuns;
-  node->run = run;
+  node->run = malloc(nULLsInRun * sizeof(unsigned long long));
+  memcpy(node->run, run, nULLsInRun * sizeof(unsigned long long));
   node->nBitsInRun = nBitsInRun;
-
+  node->nULLsInRun = nULLsInRun;
   return node;
 }
 
@@ -122,8 +158,9 @@ struct RLEVector
   struct avl_tree_node *root;
   int currNEntries;
   int mostNEntries; /* High water mark */
-  int nBitsInRun; /* Length of the runs we encode */
+  int nBitsInRun;   /* Length of the runs we encode */
   int autoValidate; /* Validate after every API usage. This can be wildly expensive. */
+  int nULLsInRun;
 };
 
 RLEVector *
@@ -135,14 +172,22 @@ RLEVector_create(int runLength, int autoValidate)
   vec->currNEntries = 0;
   vec->mostNEntries = 0;
   vec->nBitsInRun = runLength;
-
-  if (runLength > 8 * sizeof(node.run)) {
-    logMsg(LOG_INFO, "RLEVector_create: Need %d bits, only have %llu", runLength, 8llu * sizeof(node.run));
-    vec->nBitsInRun = 1;
+  if (runLength % (8 * sizeof(unsigned long long)) == 0)
+  {
+    vec->nULLsInRun = runLength / (8 * sizeof(unsigned long long));
   }
+  else
+  {
+    vec->nULLsInRun = (runLength / (8 * sizeof(unsigned long long))) + 1;
+  }
+
+  // if (runLength > 8 * sizeof(node.run)) {
+  //   logMsg(LOG_INFO, "RLEVector_create: Need %d bits, only have %llu", runLength, 8llu * sizeof(node.run));
+  //   vec->nBitsInRun = 1;
+  // }
   vec->autoValidate = autoValidate;
 
-  logMsg(LOG_VERBOSE, "RLEVector_create: vec %p nBitsInRun %d, autoValidate %d", vec, vec->nBitsInRun, vec->autoValidate);
+  logMsg(LOG_VERBOSE, "RLEVector_create: vec %p nBitsInRun %d, nULLsInRun %d, autoValidate %d", vec, vec->nBitsInRun, vec->nULLsInRun, vec->autoValidate);
 
   return vec;
 }
@@ -154,30 +199,36 @@ _RLEVector_validate(RLEVector *vec)
   RLENode *prev = NULL, *curr = NULL;
   int nNodes = 0;
 
-	assert(vec != NULL);
+  assert(vec != NULL);
   logMsg(LOG_DEBUG, "  _RLEVector_validate: Validating vec %p (size %d, runs of length %d)", vec, vec->currNEntries, vec->nBitsInRun);
 
-  if (vec->currNEntries == 0) {
+  if (vec->currNEntries == 0)
+  {
     return;
   }
 
   prev = avl_tree_entry(avl_tree_first_in_order(vec->root), RLENode, node);
-  if (prev != NULL) {
+  if (prev != NULL)
+  {
     curr = avl_tree_entry(avl_tree_next_in_order(&prev->node), RLENode, node);
 
-    if (prev != NULL) {
+    if (prev != NULL)
+    {
       nNodes++;
     }
 
-    while (prev != NULL && curr != NULL) {
+    while (prev != NULL && curr != NULL)
+    {
       logMsg(LOG_DEBUG, "rleVector_validate: prev (%d,%d,%llu) curr (%d,%d,%llu)", prev->offset, prev->nRuns, prev->run, curr->offset, curr->nRuns, curr->run);
       assert(prev->offset < curr->offset); /* In-order */
-			if (RLENode_end(prev) == curr->offset) {
-				if (prev->run == curr->run){ 
+      if (RLENode_end(prev) == curr->offset)
+      {
+        if (prev->run == curr->run)
+        {
           /* Adjacent identical runs should have been merged */
           assert(!"rleVector_validate: Adjacent identical runs are not merged");
         }
-			}
+      }
       prev = curr;
       curr = avl_tree_entry(avl_tree_next_in_order(&curr->node), RLENode, node);
       nNodes++;
@@ -204,33 +255,39 @@ RLEVector_getNeighbors(RLEVector *vec, int ix)
   rnn.a = NULL;
   rnn.b = NULL;
   rnn.c = NULL;
-// int roundedIx = ix - RUN_OFFSET(ix, vec->nBitsInRun);
+  // int roundedIx = ix - RUN_OFFSET(ix, vec->nBitsInRun);
   target.offset = ix;
   target.nRuns = -1;
 
-	node = avl_tree_entry(avl_tree_lookup_node_pred(vec->root, &target.node, RLENode_avl_tree_cmp), RLENode, node);
-	if (node != NULL) {
-		/* node is the largest run beginning <= ix */
-		if (RLENode_contains(node, ix)) {
-			/* = */
-			rnn.b = node;
-			rnn.a = avl_tree_entry(avl_tree_prev_in_order(&rnn.b->node), RLENode, node);
-			rnn.c = avl_tree_entry(avl_tree_next_in_order(&rnn.b->node), RLENode, node);
-		} else {
-			/* < */
-			rnn.a = node;
-			rnn.b = NULL;
-			rnn.c = avl_tree_entry(avl_tree_next_in_order(&rnn.a->node), RLENode, node);
-		}
-	} else {
-		/* There is no run <= ix */
-		rnn.a = NULL;
-		rnn.b = NULL;
-		rnn.c = avl_tree_entry(avl_tree_first_in_order(vec->root), RLENode, node);
-	}
-	
+  node = avl_tree_entry(avl_tree_lookup_node_pred(vec->root, &target.node, RLENode_avl_tree_cmp), RLENode, node);
+  if (node != NULL)
+  {
+    /* node is the largest run beginning <= ix */
+    if (RLENode_contains(node, ix))
+    {
+      /* = */
+      rnn.b = node;
+      rnn.a = avl_tree_entry(avl_tree_prev_in_order(&rnn.b->node), RLENode, node);
+      rnn.c = avl_tree_entry(avl_tree_next_in_order(&rnn.b->node), RLENode, node);
+    }
+    else
+    {
+      /* < */
+      rnn.a = node;
+      rnn.b = NULL;
+      rnn.c = avl_tree_entry(avl_tree_next_in_order(&rnn.a->node), RLENode, node);
+    }
+  }
+  else
+  {
+    /* There is no run <= ix */
+    rnn.a = NULL;
+    rnn.b = NULL;
+    rnn.c = avl_tree_entry(avl_tree_first_in_order(vec->root), RLENode, node);
+  }
+
   logMsg(LOG_DEBUG, "rnn: a %p b %p c %p\n", rnn.a, rnn.b, rnn.c);
-	return rnn;
+  return rnn;
 }
 
 /* Given a populated RNN, merge a-b and b-c if possible. */
@@ -243,22 +300,24 @@ _RLEVector_mergeNeighbors(RLEVector *vec, RLENodeNeighbors rnn)
 
   /* Because rnn are adjacent, we can directly manipulate offsets without
    * breaking the BST property. */
-  if (rnn.a != NULL && rnn.b != NULL && RLENode_canMerge(rnn.a, rnn.b)) {
+  if (rnn.a != NULL && rnn.b != NULL && RLENode_canMerge(rnn.a, rnn.b))
+  {
     _RLEVector_removeRun(vec, rnn.b);
 
     rnn.a->nRuns += rnn.b->nRuns;
 
-    logMsg(LOG_DEBUG, "merge: Removed (%d,%d), merged with now-(%d,%d,%llu)", rnn.b->offset, rnn.b->nRuns, rnn.a->offset, rnn.a->nRuns, rnn.a->run);
+    logMsg(LOG_DEBUG, "merge: Removed (%d,%d), merged with now-(%d,%d)", rnn.b->offset, rnn.b->nRuns, rnn.a->offset, rnn.a->nRuns);
     free(rnn.b);
 
     /* Set b to a, so that the next logic will work. */
     rnn.b = rnn.a;
   }
-  if (rnn.b != NULL && rnn.c != NULL && RLENode_canMerge(rnn.b, rnn.c)) {
+  if (rnn.b != NULL && rnn.c != NULL && RLENode_canMerge(rnn.b, rnn.c))
+  {
     _RLEVector_removeRun(vec, rnn.c);
 
     rnn.b->nRuns += rnn.c->nRuns;
-    logMsg(LOG_DEBUG, "merge: Removed (%d,%d), merged with now-(%d,%d,%llu)", rnn.c->offset, rnn.c->nRuns, rnn.b->offset, rnn.b->nRuns, rnn.b->run);
+    logMsg(LOG_DEBUG, "merge: Removed (%d,%d), merged with now-(%d,%d)", rnn.c->offset, rnn.c->nRuns, rnn.b->offset, rnn.b->nRuns);
 
     free(rnn.c);
   }
@@ -269,8 +328,7 @@ _RLEVector_mergeNeighbors(RLEVector *vec, RLENodeNeighbors rnn)
     _RLEVector_validate(vec);
 }
 
-int
-RLEVector_runSize(RLEVector *vec)
+int RLEVector_runSize(RLEVector *vec)
 {
   return vec->nBitsInRun;
 }
@@ -278,13 +336,12 @@ RLEVector_runSize(RLEVector *vec)
 /* Set the bit at ix.
  * Invariant: always returns with vec fully merged; validate() should pass.
  */
-void
-RLEVector_set(RLEVector *vec, int ix)
+void RLEVector_set(RLEVector *vec, int ix)
 {
   RLENodeNeighbors rnn;
   RLENode *newRun = NULL;
-  int oldRunKernel = 0, newRunKernel = 0;
-	int roundedIx = ix - RUN_OFFSET(ix, vec->nBitsInRun);
+  unsigned long long *oldRunKernel = 0, *newRunKernel = 0;
+  int roundedIx = ix - RUN_OFFSET(ix, vec->nBitsInRun);
 
   logMsg(LOG_VERBOSE, "RLEVector_set: %d", roundedIx);
 
@@ -297,77 +354,89 @@ RLEVector_set(RLEVector *vec, int ix)
 
   /* Handle the "new" and "split" cases.
    * Update rnn.{a,b,c} as we go. */
-  if (rnn.b == NULL) {
+  if (rnn.b == NULL)
+  {
     /* Case: creates a run */
     logMsg(LOG_DEBUG, "%d: Creating a run", roundedIx);
-
-    newRunKernel = MASK_FOR(ix, vec->nBitsInRun);
-    newRun = RLENode_create(roundedIx, 1, newRunKernel, vec->nBitsInRun);
+    newRunKernel = calloc(vec->nULLsInRun, sizeof(unsigned long long));
+    setBitInRun(newRunKernel, ix % vec->nBitsInRun);
+    // printf("New run kernel: ");
+    // for (int i = 0; i < vec->nULLsInRun; i++)
+    // {
+    //   printf("%llu ", newRunKernel[i]);
+    // }
+    // printf("\n");
+    // newRunKernel = MASK_FOR(ix, vec->nBitsInRun);
+    newRun = RLENode_create(roundedIx, 1, newRunKernel, vec->nBitsInRun, vec->nULLsInRun);
 
     _RLEVector_addRun(vec, newRun);
     rnn.b = newRun;
-  } else {
+  }
+  else
+  {
     /* Case: splits a run */
     RLENode *prefixRun = NULL, *oldRun = NULL, *suffixRun = NULL;
     int ixRunNumber = 0, nRunsInPrefix = 0, nRunsInSuffix = 0;
 
-    logMsg(LOG_DEBUG, "%d: Splitting the run (%d,%d,%llu)", ix, rnn.b->offset, rnn.b->nRuns, rnn.b->run);
+    logMsg(LOG_DEBUG, "%d: Splitting the run (%d,%d,%llu)", ix, rnn.b->offset, rnn.b->nRuns, rnn.b->run[0]);
 
     /* Calculate the run kernels */
     oldRun = rnn.b;
     oldRunKernel = oldRun->run;
-    newRunKernel = oldRunKernel | MASK_FOR(ix, vec->nBitsInRun);
-
+    // newRunKernel = oldRunKernel | MASK_FOR(ix, vec->nBitsInRun);
+    newRunKernel = malloc(vec->nULLsInRun * sizeof(unsigned long long));
+    copyRun(newRunKernel, oldRunKernel, vec->nULLsInRun);
+    setBitInRun(newRunKernel, ix % vec->nBitsInRun);
     /* Remove the affected run */
     _RLEVector_removeRun(vec, oldRun);
 
     /* Insert the new run */
     logMsg(LOG_DEBUG, "adding intercalary run");
-    newRun = RLENode_create(roundedIx, 1, newRunKernel, vec->nBitsInRun);
+    newRun = RLENode_create(roundedIx, 1, newRunKernel, vec->nBitsInRun, vec->nULLsInRun);
     _RLEVector_addRun(vec, newRun);
     rnn.b = newRun;
-    
+
     /* Insert prefix and suffix */
     ixRunNumber = RUN_NUMBER(ix, oldRun->offset, oldRun->nBitsInRun);
     nRunsInPrefix = ixRunNumber;
     nRunsInSuffix = oldRun->nRuns - (ixRunNumber + 1);
 
-    if (nRunsInPrefix > 0) {
+    if (nRunsInPrefix > 0)
+    {
       logMsg(LOG_DEBUG, "adding prefix");
-      prefixRun = RLENode_create(oldRun->offset, nRunsInPrefix, oldRunKernel, vec->nBitsInRun);
+      prefixRun = RLENode_create(oldRun->offset, nRunsInPrefix, oldRunKernel, vec->nBitsInRun, oldRun->nULLsInRun);
       _RLEVector_addRun(vec, prefixRun);
 
       rnn.a = prefixRun;
     }
-    if (nRunsInSuffix > 0) {
+    if (nRunsInSuffix > 0)
+    {
       logMsg(LOG_DEBUG, "adding suffix");
-      suffixRun = RLENode_create(roundedIx + vec->nBitsInRun, nRunsInSuffix, oldRunKernel, vec->nBitsInRun);
+      suffixRun = RLENode_create(roundedIx + vec->nBitsInRun, nRunsInSuffix, oldRunKernel, vec->nBitsInRun, oldRun->nULLsInRun);
       _RLEVector_addRun(vec, suffixRun);
 
       rnn.c = suffixRun;
     }
-
     /* Clean up */
+    free(oldRun->run);
     free(oldRun);
   }
 
-  logMsg(LOG_DEBUG, "Before merge: run is (%d,%d,%llu)", rnn.b->offset, rnn.b->nRuns, rnn.b->run);
-
+  logMsg(LOG_DEBUG, "Before merge: run is (%d,%d,%llu)", rnn.b->offset, rnn.b->nRuns, rnn.b->run[0]);
   _RLEVector_mergeNeighbors(vec, rnn);
   /* After merging, rnn.{a,b,c} is untrustworthy. */
-  
+
   if (vec->autoValidate)
     _RLEVector_validate(vec);
-
+  // printAllRunsInBinary(vec);
   return;
 }
 
-int
-RLEVector_get(RLEVector *vec, int ix)
+int RLEVector_get(RLEVector *vec, int ix)
 {
   RLENode target;
   RLENode *match = NULL;
-// int roundedIx = ix - RUN_OFFSET(ix, vec->nBitsInRun);
+  // int roundedIx = ix - RUN_OFFSET(ix, vec->nBitsInRun);
   logMsg(LOG_DEBUG, "RLEVector_get: %d", ix);
 
   if (vec->autoValidate)
@@ -376,76 +445,123 @@ RLEVector_get(RLEVector *vec, int ix)
   target.offset = ix;
   target.nRuns = -1;
   match = avl_tree_entry(
-    avl_tree_lookup_node(vec->root, &target.node, RLENode_avl_tree_cmp),
-    RLENode, node);
+      avl_tree_lookup_node(vec->root, &target.node, RLENode_avl_tree_cmp),
+      RLENode, node);
 
-  if (match == NULL) {
+  if (match == NULL)
+  {
     return 0;
   }
-
   logMsg(LOG_DEBUG, "match: %p", match);
-  return BIT_ISSET(match->run, ix % match->nBitsInRun);
+  int bitInRun = getBitInRun(match->run, ix % match->nBitsInRun);
+  logMsg(LOG_DEBUG, "got bit: %d", bitInRun);
+  return bitInRun;
+  // return BIT_ISSET(match->run[arrayIndex], ix % match->nBitsInRun);
 }
 
-int
-RLEVector_currSize(RLEVector *vec)
+int RLEVector_currSize(RLEVector *vec)
 {
   return vec->currNEntries;
 }
 
-int
-RLEVector_maxObservedSize(RLEVector *vec)
+int RLEVector_maxObservedSize(RLEVector *vec)
 {
   return vec->mostNEntries;
 }
 
-int
-RLEVector_maxBytes(RLEVector *vec)
+int RLEVector_maxBytes(RLEVector *vec)
 {
-  return sizeof(RLEVector) /* Internal overhead */ \
-    + sizeof(RLENode) * RLEVector_maxObservedSize(vec) /* Cost per node */ \
-    ;
+  return sizeof(RLEVector)                                  /* Internal overhead */
+         + sizeof(RLENode) * RLEVector_maxObservedSize(vec) /* Cost per node */
+         + sizeof(unsigned long long) * (vec->nULLsInRun)
+      ;
 }
 
-void
-RLEVector_destroy(RLEVector *vec)
+void RLEVector_destroy(RLEVector *vec)
 {
   RLENode *node = NULL;
   avl_tree_for_each_in_postorder(node, vec->root, RLENode, node)
-    free(node);
+      free(node);
   free(vec);
 
   return;
 }
-static void ullToBinaryString(unsigned long long value, char *buffer, int bufferSize) {
-    buffer[bufferSize - 1] = '\0';
-    int index = bufferSize - 2;
-    while (index >= 0) {
-        buffer[index] = (value % 2) ? '1' : '0';
-        value /= 2;
-        index--;
-    }
-}
 static void _RLEVector_addRun(RLEVector *vec, RLENode *node)
 {
-  char runBinary[65]; // 64 bits + 1 for null terminator
-    ullToBinaryString(node->run, runBinary, sizeof(runBinary));
-  logMsg(LOG_DEBUG, "Adding run (%d,%d,%s)", node->offset, node->nRuns, runBinary);
-
-	assert(avl_tree_insert(&vec->root, &node->node, RLENode_avl_tree_cmp) == NULL);
+  // int totalBits = node->nULLsInRun * 64;
+  // char runBinary[totalBits + 1];
+  // char runBinary[65]; // 64 bits + 1 for null terminator
+  // for (int i = 0; i < node->nULLsInRun; i++)
+  // {
+  // char buffer[65];
+  // ullToBinaryString(node->run, runBinary, totalBits);
+  // strcat(runBinary, buffer);
+  // }
+  // ullToBinaryString(node->run, runBinary, sizeof(runBinary));
+  logMsg(LOG_DEBUG, "Adding run (%d,%d)", node->offset, node->nRuns);
+  // free(runBinary);
+  assert(avl_tree_insert(&vec->root, &node->node, RLENode_avl_tree_cmp) == NULL);
   vec->currNEntries++;
-  if (vec->mostNEntries < vec->currNEntries) {
+  if (vec->mostNEntries < vec->currNEntries)
+  {
     vec->mostNEntries = vec->currNEntries;
   }
 }
 
 static void _RLEVector_removeRun(RLEVector *vec, RLENode *node)
 {
-	logMsg(LOG_DEBUG, "Removing run (%d,%d,%llu)", node->offset, node->nRuns, node->run);
+  // int totalBits = node->nULLsInRun * 64;
+  // char *runBinary = malloc(totalBits + 1);
+  // ullToBinaryString(node->run, runBinary, totalBits);
+  logMsg(LOG_DEBUG, "Removing run (%d,%d)", node->offset, node->nRuns);
+  // free(runBinary);
+  // logMsg(LOG_DEBUG, "Removing run (%d,%d,%s)", node->offset, node->nRuns, node->run);
 
-	avl_tree_remove(&vec->root, &node->node);
+  avl_tree_remove(&vec->root, &node->node);
   vec->currNEntries--;
 
   if (vec->autoValidate)
     _RLEVector_validate(vec);
+}
+static void ullToBinaryString(const unsigned long long *run, int nLongLongs)
+{
+  for (int i = 0; i < nLongLongs; i++)
+  {
+    unsigned long long x = 1ULL << 63;
+    printf("Run: %llu\n", run[i]);
+    while (x > 0)
+    {
+      if (run[i] & x)
+      {
+        printf("1 ");
+      }
+      else
+      {
+        printf("0 ");
+      }
+      x >>= 1;
+    }
+    printf("\n");
+    // buffer[index--] = (run[i] & (1 << j)) ? '1' : '0';
+    // if (index < 0)
+    // return; // Prevent buffer overflow
+  }
+  printf("\n");
+}
+void printAllRunsInBinary(RLEVector *vec)
+{
+  if (vec == NULL)
+  {
+    printf("Vector is NULL.\n");
+    return;
+  }
+
+  RLENode *node = NULL;
+
+  avl_tree_for_each_in_order(node, vec->root, RLENode, node)
+  {
+    ullToBinaryString(node->run, vec->nULLsInRun);
+    printf("Run offset: %d, number of runs: %d, ull: %d\n",
+           node->offset, node->nRuns, node->nULLsInRun);
+  }
 }
