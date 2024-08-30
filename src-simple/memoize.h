@@ -6,11 +6,10 @@
 #define MEMOIZE_H
 
 #include "regexp.h"
-// #include "rle.h"
-#include "rle-array.h"
+#include "rle.h"
 /* Memoization-related compilation phase. */
 
-void Prog_determineMemoNodes(Prog *p, int memoMode);
+void Prog_determineMemoNodes(Prog *p, int memoMode, int* rleValues);
 
 /* Memoization-related simulation. */
 
@@ -71,6 +70,7 @@ enum /* Memo.mode */
 	MEMO_FULL,
 	MEMO_IN_DEGREE_GT1,
 	MEMO_LOOP_DEST,
+	MEMO_ARRAY
 };
 
 enum /* Memo.encoding */

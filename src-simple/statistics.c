@@ -76,7 +76,10 @@ printStats(Prog *prog, Memo *memo, VisitTable *visitTable, uint64_t startTime, S
   case MEMO_LOOP_DEST:
     strcpy(memoConfig_vertexSelection, "\"LOOP\"");
     break;
-	default: assert(!"Unknown memo mode\n");
+  case MEMO_ARRAY:
+    strcpy(memoConfig_vertexSelection, "\"ARRAY\"");
+    break;
+  default: assert(!"Unknown memo mode\n");
   }
 
   switch (memo->encoding) {

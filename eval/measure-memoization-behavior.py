@@ -297,7 +297,7 @@ class MyTask(libLF.parallel.ParallelTask): # Not actually parallel, but keep the
     
     Returns: automatonSize (integer), phiSize (integer), time (numeric), algoSpace (numeric), bytesSpace (numeric)
     """
-    queryFile = libMemo.ProtoRegexEngine.buildQueryFile(regex.pattern, mostEI.build(nPumps, maxAttackStringLen)[0], rleValues=regex.rleValues)
+    queryFile = libMemo.ProtoRegexEngine.buildQueryFile(regex.pattern, mostEI.build(nPumps, maxAttackStringLen)[0], rleKValue=regex.rleKValue, rleValues=regex.rleValues)
 
     measures = []
     for i in range(0, nTrialsPerCondition):
@@ -627,8 +627,8 @@ def main(regexFile, useCSharpToFindMostEI, perfPumps, maxAttackStringLen, queryP
 
   #### Emit results
   libLF.log('Writing results to {}'.format(outFile))
-  df.to_csv(outFile)
-  # df.to_pickle(outFile)
+  # df.to_csv(outFile)
+  df.to_pickle(outFile)
   libLF.log("Data columns: {}".format(df.columns))
 
 #####################################################

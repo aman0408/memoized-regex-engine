@@ -29,16 +29,18 @@ class ProtoRegexEngine:
         SS_Full = "full memoization"
         SS_InDeg = "selective: indeg>1"
         SS_Loop = "selective: loop"
+        SS_ARRAY = "selective: array"
 
         scheme2cox = {
             SS_None: "none",
             SS_Full: "full",
             SS_InDeg: "indeg",
             SS_Loop: "loop",
+            SS_ARRAY: "array"
         }
 
         all = scheme2cox.keys()
-        allMemo = [ SS_Full, SS_InDeg, SS_Loop ]
+        allMemo = [ SS_Full, SS_InDeg, SS_Loop, SS_ARRAY ]
 
     class ENCODING_SCHEME:
         ES_None = "no encoding"
@@ -56,7 +58,7 @@ class ProtoRegexEngine:
         all = scheme2cox.keys()
 
     @staticmethod
-    def buildQueryFile(pattern, input, filePrefix="protoRegexEngineQueryFile-", rleValues=[]):
+    def buildQueryFile(pattern, input, filePrefix="protoRegexEngineQueryFile-", rleKValue=1, rleValues=[]):
         """Build a query file
         
         pattern: string
@@ -71,7 +73,8 @@ class ProtoRegexEngine:
             json.dump({
                 "pattern": pattern,
                 "input": input,
-                "rleValues": rleValues
+                "rleValues": rleValues,
+                "rleKValue": rleKValue
             }, outStream)
         return name
 
@@ -155,14 +158,14 @@ class SimpleRegex:
   def __init__(self):
     self.pattern = None
     self.evilInputs = []
-    # self.rleKValue = 1
+    self.rleKValue = 1
     self.rleValues = []
     return
   
   def initFromNDJSON(self, line):
     obj = json.loads(line)
     self.pattern = obj['pattern']
-    # self.rleKValue = obj['rleKValue']
+    self.rleKValue = obj['rleKValue']
     self.rleValues = obj['k_values']
     self.evilInputs = []
     if 'evilInputs' in obj:

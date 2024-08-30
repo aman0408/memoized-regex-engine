@@ -101,10 +101,9 @@ Prog_find_ancestor_nodes(Prog *p)
 }
 
 void
-Prog_determineMemoNodes(Prog *p, int memoMode)
+Prog_determineMemoNodes(Prog *p, int memoMode, int *rleValues)
 {
 	int i, nextStateNum;
-
 	/* Determine which nodes to memoize based on memo mode. */
 	switch (memoMode) {
 	case MEMO_FULL:
@@ -142,7 +141,16 @@ Prog_determineMemoNodes(Prog *p, int memoMode)
 			p->start[i].memoInfo.shouldMemo = 0;
 		}
 		break;
-	default:
+  case MEMO_ARRAY:
+    for (i = 0; i < p->len; i++)
+    {
+      if (rleValues[i] != 0)
+      {
+        p->start[i].memoInfo.shouldMemo = 1;
+      }
+    }
+    break;
+  default:
 		assert(!"Unknown memoMode\n");
 	}
 
@@ -304,7 +312,6 @@ initMemoTable(Prog *prog, int nChars)
             int visitInterval = (memo.encoding == ENCODING_RLE_TUNED) ? prog->start[j].memoInfo.visitInterval : 1;
             if (visitInterval < 1)
               visitInterval = 1;
-            //visitInterval = 60;
             logMsg(LOG_INFO, "%s: state %d (memo state %d) will use visitInterval %d", prefix, j, i, visitInterval);
             // memo.rleVectors[i] = RLEVector_create(visitInterval, 0 /* Do not auto-validate */);
             // memo.rleVectors[i] = RLEVector_create(nChars, visitInterval);

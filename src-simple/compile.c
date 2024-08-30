@@ -503,21 +503,21 @@ compile(Regexp *r, int memoMode, int memoEncoding, int *rleValues, int rleValues
 	printf("N: %d\n", n);
 	if (memoEncoding == ENCODING_RLE_TUNED) {
 		for (i = 0; i < n; i++) {
-			// if (singleRleK != NULL){
-				// p->start[i].memoInfo.visitInterval = singleRleK;
-			// } else{
+			if (memoMode != MEMO_ARRAY){
+				p->start[i].memoInfo.visitInterval = singleRleK;
+			} else{
 				if (i < rleValuesLength){
-					p->start[i].memoInfo.visitInterval = rleValues[i];	
+					if (rleValues[i] == 0){
+						p->start[i].memoInfo.visitInterval = 1;
+					} else {
+						p->start[i].memoInfo.visitInterval = rleValues[i];
+					}
 				} else {
-					printf("errorrrrrr\n");
+					printf("errorrrrrr i: %d, length: %d\n", i, rleValuesLength);
 					return -1;
-					p->start[i].memoInfo.visitInterval = 1; /* A good default */
 				}
-			// }
+			}
 		}
-		// for (i = 0; i < n; i++) {
-		// 	p->start[i].memoInfo.visitInterval = singleRleK; /* A good default */
-		// }
 	} else {
 		for (i = 0; i < n; i++) {
 			p->start[i].memoInfo.visitInterval = 1; /* A good default */

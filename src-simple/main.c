@@ -42,7 +42,7 @@ void
 usage(void)
 {
 	/* TODO: Diagnose cases where rle-tuned doesn't help */
-	fprintf(stderr, "usage: re {none|full|indeg|loop} {none|neg|rle|rle-tuned} { regexp string | -f patternAndStr.json } { singlerlek int | multiplerlek int,int...}\n");
+	fprintf(stderr, "usage: re {none|full|indeg|loop|array} {none|neg|rle|rle-tuned} { regexp string | -f patternAndStr.json } { singlerlek int | multiplerlek int,int...}\n");
 	fprintf(stderr, "  The first argument is the memoization strategy\n");
 	fprintf(stderr, "  The second argument is the memo table encoding scheme\n");
 	exit(2);
@@ -110,8 +110,8 @@ loadQuery(char *inFile)
 	q.rleValues = int_array;
 	q.rleValuesLength = array_size;
 	printf("Length %d\n", q.rleValuesLength);
-	// key = cJSON_GetObjectItem(parsedJson, "rleKValue");
-	// q.singleRleK = key->valueint;
+	key = cJSON_GetObjectItem(parsedJson, "rleKValue");
+	q.singleRleK = key->valueint;
 	cJSON_Delete(parsedJson);
 	free(rawJson);
 	return q;
@@ -128,6 +128,8 @@ getMemoMode(char *arg)
 		return MEMO_IN_DEGREE_GT1;
 	else if (strcmp(arg, "loop") == 0)
 		return MEMO_LOOP_DEST;
+	else if (strcmp(arg, "array") == 0)
+		return MEMO_ARRAY;
     else {
 		fprintf(stderr, "Error, unknown memostrategy %s\n", arg);
 		usage();
@@ -230,6 +232,8 @@ main(int argc, char **argv)
 		q.input = processStringWithEscapes(argv[4]);
 		if (strcmp(argv[5], "singlerlek") == 0){
 			q.singleRleK = strtol(argv[6], NULL, 10);
+			q.rleValues = malloc(sizeof(int));
+			q.rleValuesLength = 1;
 		} else {
 			char *input = argv[6];
 			char *token;
@@ -297,24 +301,24 @@ main(int argc, char **argv)
 
 	// Compile
 	prog = compile(re, memoMode, memoEncoding, q.rleValues, q.rleValuesLength, q.singleRleK);
-	// if (shouldLog(LOG_DEBUG)) {
+	if (shouldLog(LOG_DEBUG)) {
 		logMsg(LOG_INFO, "Compiled :");
 		printprog(prog);
 		printf("\n");
-	// }
+	}
 	Prog_assertNoInfiniteLoops(prog);
 
 	// Memoization settings
 	prog->memoMode = memoMode;
 	prog->memoEncoding = memoEncoding;
-	Prog_determineMemoNodes(prog, memoMode);
+	Prog_determineMemoNodes(prog, memoMode, q.rleValues);
 	logMsg(LOG_INFO, "Will memoize %d states", prog->nMemoizedStates);
 
-	if (shouldLog(LOG_DEBUG)) {
+	// if (shouldLog(LOG_DEBUG)) {
 		logMsg(LOG_INFO, "Compiled and memo-marked:");
 		printprog(prog);
 		printf("\n");
-	}
+	// }
 
 	// Simulate
 	logMsg(LOG_INFO, "Candidate string: %s", q.input);
