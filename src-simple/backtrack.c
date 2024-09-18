@@ -329,7 +329,7 @@ BACKTRACKING_SEARCH:
         sp++;
         continue;
       case Any:
-        if (*sp == 0 || *sp == '\n' || *sp == '\r')
+        if (*sp == 0 || *sp == '\n' || *sp == '\r' || *sp > 127)
           goto Dead;
         pc++;
         sp++;

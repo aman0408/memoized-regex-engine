@@ -888,17 +888,18 @@ _emitRegexpCharEscape2InstCharRange(Regexp *r, InstCharRange *instCR)
 	case 'S':
 		/* space, newline, tab, vertical wsp, a few others */
 		instCR->lows[0] = 9; instCR->highs[0] = 13;
-		instCR->lows[1] = 28; instCR->highs[1] = 32;
+		instCR->lows[1] = 32; instCR->highs[1] = 32;
 		instCR->count = 2;
 		instCR->invert = isupper(r->ch);
 		return;
 	case 'w':
 	case 'W':
-		/* a-z A-Z 0-9 */
+		/* a-z A-Z 0-9 _ */
 		instCR->lows[0] = 97; instCR->highs[0] = 122;
 		instCR->lows[1] = 65; instCR->highs[1] = 90;
 		instCR->lows[2] = 48; instCR->highs[2] = 57;
-		instCR->count = 3;
+		instCR->lows[3] = 95; instCR->highs[3] = 95;
+		instCR->count = 4;
 		instCR->invert = isupper(r->ch);
 		return;
 	case 'd':
@@ -911,6 +912,9 @@ _emitRegexpCharEscape2InstCharRange(Regexp *r, InstCharRange *instCR)
 	/* Not a built-in CC */
 	// Handle special escape sequences
 	case 'r': // UNIX-style!
+		instCR->lows[0] = '\r'; instCR->highs[0] = '\r';
+		instCR->count = 1;
+		return;
 	case 'n':
 		instCR->lows[0] = '\n'; instCR->highs[0] = '\n';
 		instCR->count = 1;
