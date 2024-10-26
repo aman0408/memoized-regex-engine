@@ -33,14 +33,14 @@ class ProtoRegexEngine:
 
         scheme2cox = {
             SS_None: "none",
-            SS_Full: "full",
+            # SS_Full: "full",
             SS_InDeg: "indeg",
             SS_Loop: "loop",
             SS_ARRAY: "array"
         }
 
         all = scheme2cox.keys()
-        allMemo = [ SS_Full, SS_InDeg, SS_Loop, SS_ARRAY ]
+        allMemo = [ SS_InDeg, SS_Loop, SS_ARRAY ]
 
     class ENCODING_SCHEME:
         ES_None = "no encoding"
@@ -50,12 +50,13 @@ class ProtoRegexEngine:
 
         scheme2cox = {
             ES_None: "none",
-            ES_Negative: "neg",
+            # ES_Negative: "neg",
             ES_RLE: "rle",
             ES_RLE_TUNED: "rle-tuned", # TODO Work out the right math here
         }
 
-        all = scheme2cox.keys()
+        # all = scheme2cox.keys()
+        all = [ES_RLE, ES_RLE_TUNED]
 
     @staticmethod
     def buildQueryFile(pattern, input, filePrefix="protoRegexEngineQueryFile-", rleKValue=1, rleValues=[]):
@@ -310,22 +311,22 @@ class MemoizationDynamicAnalysis:
     assert self.phiQuantifier >= 0, "Negative |Phi_quantifier|?"
     assert self.inputLength > 0, "no input"
     # Full space cost (algorithmic) for Phi=Q should be |Q| * |w|
-    fullSpaceCostAlgo = self.selectionPolicy_to_enc2spaceAlgo[
-      ProtoRegexEngine.SELECTION_SCHEME.SS_Full
-    ][
-      ProtoRegexEngine.ENCODING_SCHEME.ES_None
-    ]
+    # fullSpaceCostAlgo = self.selectionPolicy_to_enc2spaceAlgo[
+    #   ProtoRegexEngine.SELECTION_SCHEME.SS_Full
+    # ][
+    #   ProtoRegexEngine.ENCODING_SCHEME.ES_None
+    # ]
     # Should be "bigger" -- the difference can arise due to pump strings being > 1 character long
     # assert fullSpaceCostAlgo <= self.automatonSize * (self.inputLength+1), \
     #   "fullSpaceCost {} is not >= {} * {}".format(fullSpaceCostAlgo, self.automatonSize, self.inputLength)
 
     # Full table should have the most space complexity
-    for selectionScheme, enc2space in self.selectionPolicy_to_enc2spaceAlgo.items():
-      for encodingScheme, spaceCost in enc2space.items():
-        assert spaceCost <= fullSpaceCostAlgo, \
-          "General fullSpaceCost < cost for {}-{}".format(selectionScheme, encodingScheme)
-        assert spaceCost <= enc2space[ProtoRegexEngine.ENCODING_SCHEME.ES_None], \
-          "Phi-specific fullSpaceCost < cost for {}-{}".format(selectionScheme, encodingScheme)
+    # for selectionScheme, enc2space in self.selectionPolicy_to_enc2spaceAlgo.items():
+      # for encodingScheme, spaceCost in enc2space.items():
+        # assert spaceCost <= fullSpaceCostAlgo, \
+        #   "General fullSpaceCost < cost for {}-{}".format(selectionScheme, encodingScheme)
+        # assert spaceCost <= enc2space[ProtoRegexEngine.ENCODING_SCHEME.ES_None], \
+        #   "Phi-specific fullSpaceCost < cost for {}-{}".format(selectionScheme, encodingScheme)
 
     return True
   
